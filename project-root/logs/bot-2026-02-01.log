@@ -1,8 +1,0 @@
-[2026-02-01 01:21:26] [INFO] Testando configurações...
-[2026-02-01 01:21:26] [SUCCESS] Logger funcionando!
-[2026-02-01 01:21:26] [WARNING] Este é um aviso de teste
-[2026-02-01 01:21:26] [ERROR] Este é um erro de teste
-[2026-02-01 01:21:26] [WHATSAPP] QR_GENERATED | {"timestamp":"2026-02-01T01:21:26.870Z"}
-[2026-02-01 01:21:26] [USER] João → Acessou o menu
-[2026-02-01 01:21:26] [INFO] Testando Data Service...
-[2026-02-01 01:21:26] [SUCCESS] ✅ Todos os testes passaram!
