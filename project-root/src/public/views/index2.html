@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +57,7 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
             padding: 8px 12px;
@@ -69,7 +70,7 @@
 
         .admin-btn-header:hover {
             opacity: 1;
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .progress-container {
@@ -168,6 +169,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -545,6 +547,7 @@
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -720,7 +723,8 @@
             flex-direction: column;
         }
 
-        .btn-edit, .btn-delete {
+        .btn-edit,
+        .btn-delete {
             padding: 8px 16px;
             border: none;
             border-radius: 8px;
@@ -845,14 +849,16 @@
             display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 0.6s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 600px) {
@@ -891,6 +897,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -958,12 +965,8 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 25px;">
-                    <input 
-                        type="text" 
-                        id="serviceSearch" 
-                        class="form-input" 
-                        placeholder="🔍 Buscar serviço... (ex: design, limpeza, cílios)"
-                        style="background: white;">
+                    <input type="text" id="serviceSearch" class="form-input"
+                        placeholder="🔍 Buscar serviço... (ex: design, limpeza, cílios)" style="background: white;">
                     <div class="input-help" id="searchResultCount"></div>
                 </div>
 
@@ -1051,7 +1054,7 @@
     <div class="admin-modal" id="adminModal">
         <div class="admin-content">
             <button class="admin-close" onclick="closeAdminModal()">×</button>
-            
+
             <div class="admin-header">
                 <h2 class="admin-title">🔐 Painel Administrativo</h2>
                 <p class="admin-subtitle">Gerenciar serviços e preços</p>
@@ -1060,7 +1063,8 @@
             <div class="admin-auth" id="adminAuth">
                 <div class="form-group">
                     <label class="form-label">Digite a senha de acesso:</label>
-                    <input type="password" id="adminPassword" class="form-input" placeholder="Senha" style="text-align: center;">
+                    <input type="password" id="adminPassword" class="form-input" placeholder="Senha"
+                        style="text-align: center;">
                     <div id="adminPasswordError" class="error-message">Senha incorreta!</div>
                 </div>
                 <button class="btn btn-primary" onclick="validateAdminPassword()" style="width: 100%;">Entrar</button>
@@ -1079,7 +1083,7 @@
                 <div class="admin-tab-content" id="adminManageTab">
                     <div class="service-form">
                         <h3 class="service-form-title" id="formTitle">➕ Adicionar Novo Serviço</h3>
-                        
+
                         <div class="form-row full">
                             <div class="form-group">
                                 <label class="form-label">Categoria:</label>
@@ -1097,33 +1101,38 @@
                         <div class="form-row full">
                             <div class="form-group">
                                 <label class="form-label">Nome do Serviço:</label>
-                                <input type="text" id="serviceName" class="form-input" placeholder="Ex: Design de Sobrancelhas">
+                                <input type="text" id="serviceName" class="form-input"
+                                    placeholder="Ex: Design de Sobrancelhas">
                             </div>
                         </div>
 
                         <div class="form-row full">
                             <div class="form-group">
                                 <label class="form-label">Descrição:</label>
-                                <input type="text" id="serviceDesc" class="form-input" placeholder="Ex: Design profissional">
+                                <input type="text" id="serviceDesc" class="form-input"
+                                    placeholder="Ex: Design profissional">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Valor (R$):</label>
-                                <input type="number" id="servicePrice" class="form-input" placeholder="0.00" step="0.01" min="0">
+                                <input type="number" id="servicePrice" class="form-input" placeholder="0.00" step="0.01"
+                                    min="0">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Duração (minutos):</label>
-                                <input type="number" id="serviceDuration" class="form-input" placeholder="30" min="10" step="10">
+                                <input type="number" id="serviceDuration" class="form-input" placeholder="30" min="10"
+                                    step="10">
                             </div>
                         </div>
 
                         <div class="form-row full">
                             <div class="form-group">
                                 <label class="form-label">Sessões (Opcional):</label>
-                                <input type="number" id="serviceSessions" class="form-input" placeholder="Deixe vazio se não aplicável" min="1">
+                                <input type="number" id="serviceSessions" class="form-input"
+                                    placeholder="Deixe vazio se não aplicável" min="1">
                                 <div class="input-help">Informe o número de sessões se for um pacote</div>
                             </div>
                         </div>
@@ -1134,7 +1143,8 @@
                             <button class="btn btn-primary" onclick="saveService()" style="flex: 1;">
                                 <span id="saveButtonText">💾 Salvar Serviço</span>
                             </button>
-                            <button class="btn btn-secondary" onclick="cancelEdit()" id="cancelEditBtn" style="display: none;">
+                            <button class="btn btn-secondary" onclick="cancelEdit()" id="cancelEditBtn"
+                                style="display: none;">
                                 Cancelar
                             </button>
                         </div>
@@ -1148,8 +1158,9 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
+
     <script>
+
         const firebaseConfig = {
             apiKey: "AIzaSyBYo_laDj2ZfxWZLzCJvFaPq3sj0iOCfWM",
             authDomain: "agendamentos-pri.firebaseapp.com",
@@ -1172,7 +1183,7 @@
             dateFormatted: null,
             time: null
         };
-        
+
         let availableSchedules = [];
         let lastJsonHash = null;
         let updateCheckInterval = null;
@@ -1205,9 +1216,9 @@
             }
         };
 
-        const ADMIN_PASSWORD = 'pri2024';
+        const ADMIN_PASSWORD = 'pri2024'
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             setupEventListeners();
             loadServicesFromFirestore();
             loadScheduleData();
@@ -1217,20 +1228,20 @@
         async function loadServicesFromFirestore() {
             try {
                 const servicesSnapshot = await db.collection('services').get();
-                
+
                 Object.keys(serviceCategories).forEach(key => {
                     serviceCategories[key].services = [];
                 });
-                
+
                 servicesSnapshot.forEach(doc => {
                     const service = doc.data();
                     service.id = doc.id;
-                    
+
                     if (serviceCategories[service.category]) {
                         serviceCategories[service.category].services.push(service);
                     }
                 });
-                
+
                 console.log('Serviços carregados do Firestore:', servicesSnapshot.size, 'serviços');
                 loadServices();
             } catch (error) {
@@ -1246,14 +1257,14 @@
                 { category: 'micropigmentacao', name: 'Volume Express Soft', desc: 'Extensão de cílios', price: 120, duration: 90 },
                 { category: 'micropigmentacao', name: 'Colocação Completa', desc: '100% dos cílios', price: 180, duration: 120 },
                 { category: 'micropigmentacao', name: 'Remoção de Cílios', desc: 'Remoção completa', price: 80, duration: 60 },
-                
+
                 { category: 'protocolos', name: 'GlowLips (Hidragloss)', desc: '1 sessão', price: 150, duration: 30 },
                 { category: 'protocolos', name: 'GlowLips (Hidragloss)', desc: '3 sessões', price: 437, duration: 30, sessions: 3 },
                 { category: 'protocolos', name: 'Lash Lifting', desc: 'Curvatura + tintura + hidratação', price: 120, duration: 80 },
                 { category: 'protocolos', name: 'Brow Lamination', desc: 'Fios alinhados + tintura', price: 150, duration: 90 },
                 { category: 'protocolos', name: 'Pigmentação Cílios Naturais', desc: 'Tintura', price: 80, duration: 30 },
                 { category: 'protocolos', name: 'Pigmentação Sobrancelhas', desc: 'Com henna ou tintura', price: 60, duration: 30 },
-                
+
                 { category: 'depilacaoFacial', name: 'Design Sobrancelhas', desc: 'Design profissional', price: 35, duration: 30 },
                 { category: 'depilacaoFacial', name: 'Design + Henna', desc: 'Design + pigmentação', price: 50, duration: 20 },
                 { category: 'depilacaoFacial', name: 'Buço', desc: 'Depilação buço', price: 10, duration: 10 },
@@ -1261,7 +1272,7 @@
                 { category: 'depilacaoFacial', name: 'Nariz', desc: 'Depilação nariz', price: 15, duration: 10 },
                 { category: 'depilacaoFacial', name: 'Depilação Facial Completa', desc: 'Rosto completo', price: 60, duration: 60 },
                 { category: 'depilacaoFacial', name: 'Design Rena', desc: 'Design especial', price: 70, duration: 60 },
-                
+
                 { category: 'depilacaoCorporal', name: 'Axila', desc: 'Depilação axilas', price: 20, duration: 10 },
                 { category: 'depilacaoCorporal', name: 'Meia Perna', desc: 'Até o joelho', price: 40, duration: 30 },
                 { category: 'depilacaoCorporal', name: 'Perna Inteira', desc: 'Completa', price: 70, duration: 60 },
@@ -1270,7 +1281,7 @@
                 { category: 'depilacaoCorporal', name: 'Virilha Cavada', desc: 'com perianal', price: 70, duration: 60 },
                 { category: 'depilacaoCorporal', name: 'Virilha Total', desc: 'sem perianal', price: 60, duration: 60 },
                 { category: 'depilacaoCorporal', name: 'Virilha Total', desc: 'com perianal', price: 70, duration: 60 },
-                
+
                 { category: 'outros', name: 'Limpeza de Pele', desc: 'Tratamento completo', price: 120, duration: 90 },
                 { category: 'outros', name: 'Spa Lips', desc: 'Esfoliação + hidratação', price: 40, duration: 30 },
                 { category: 'outros', name: 'Massagem', desc: 'Relaxante/Drenagem', price: 90, duration: 60 }
@@ -1289,8 +1300,8 @@
 
         async function loadScheduleData() {
             try {
-                const response = await fetch('./horarios_disponiveis.json?' + Date.now());
-                
+                const response = await fetch('../../../data/horarios_disponiveis.json?' + Date.now());
+
                 if (response.ok) {
                     const jsonData = await response.json();
                     availableSchedules = jsonData.dias;
@@ -1337,7 +1348,7 @@
         function startUpdateChecker() {
             updateCheckInterval = setInterval(async () => {
                 try {
-                    const response = await fetch('./horarios_disponiveis.json?' + Date.now());
+                    const response = await fetch('../../../data/horarios_disponiveis.json?' + Date.now());
                     if (response.ok) {
                         const newData = await response.json();
                         const newHash = JSON.stringify(newData);
@@ -1357,7 +1368,7 @@
 
         function setupEventListeners() {
             document.getElementById('clientName').addEventListener('input', validateStep1);
-            document.getElementById('clientPhone').addEventListener('input', function(e) {
+            document.getElementById('clientPhone').addEventListener('input', function (e) {
                 e.target.value = formatPhone(e.target.value);
                 validateStep1();
             });
@@ -1365,16 +1376,16 @@
             document.getElementById('step2Next').addEventListener('click', () => goToStep(3));
             document.getElementById('step3Next').addEventListener('click', () => goToStep(4));
             document.getElementById('confirmBtn').addEventListener('click', confirmAppointment);
-            
+
             document.getElementById('serviceSearch').addEventListener('input', filterServices);
-            
-            document.getElementById('adminModal').addEventListener('click', function(e) {
+
+            document.getElementById('adminModal').addEventListener('click', function (e) {
                 if (e.target === this) {
                     closeAdminModal();
                 }
             });
 
-            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            document.getElementById('adminPassword').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     validateAdminPassword();
                 }
@@ -1403,12 +1414,12 @@
         function loadServices() {
             const grid = document.getElementById('servicesGrid');
             let html = '';
-            
+
             Object.keys(serviceCategories).forEach(categoryKey => {
                 const category = serviceCategories[categoryKey];
-                
+
                 if (category.services.length === 0) return;
-                
+
                 html += `
                     <div class="service-category" data-category="${categoryKey}" style="margin-bottom: 20px;">
                         <div class="category-title" style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 12px; padding-left: 5px; border-left: 4px solid #667eea;">
@@ -1432,11 +1443,11 @@
                     </div>
                 `;
             });
-            
+
             if (html === '') {
                 html = '<div style="text-align: center; padding: 40px; color: #666;">Nenhum serviço disponível no momento.</div>';
             }
-            
+
             grid.innerHTML = html;
             updateSearchResultCount();
         }
@@ -1445,7 +1456,7 @@
             const searchTerm = document.getElementById('serviceSearch').value.toLowerCase().trim();
             const categories = document.querySelectorAll('.service-category');
             let visibleCount = 0;
-            
+
             if (searchTerm === '') {
                 categories.forEach(category => {
                     category.style.display = 'block';
@@ -1458,15 +1469,15 @@
                 updateSearchResultCount(visibleCount, false);
                 return;
             }
-            
+
             categories.forEach(category => {
                 const services = category.querySelectorAll('.service-card');
                 let categoryHasVisibleServices = false;
-                
+
                 services.forEach(service => {
                     const serviceName = service.getAttribute('data-service-name');
                     const serviceDesc = service.getAttribute('data-service-desc');
-                    
+
                     if (serviceName.includes(searchTerm) || serviceDesc.includes(searchTerm)) {
                         service.style.display = 'block';
                         categoryHasVisibleServices = true;
@@ -1475,25 +1486,25 @@
                         service.style.display = 'none';
                     }
                 });
-                
+
                 if (categoryHasVisibleServices) {
                     category.style.display = 'block';
                 } else {
                     category.style.display = 'none';
                 }
             });
-            
+
             updateSearchResultCount(visibleCount, true);
         }
 
         function updateSearchResultCount(count, isSearching) {
             const resultDiv = document.getElementById('searchResultCount');
-            
+
             if (!isSearching) {
                 resultDiv.textContent = '';
                 return;
             }
-            
+
             if (count === 0) {
                 resultDiv.textContent = '❌ Nenhum serviço encontrado. Tente outro termo.';
                 resultDiv.style.color = '#e74c3c';
@@ -1509,7 +1520,7 @@
         function selectService(serviceId, categoryKey) {
             document.querySelectorAll('.service-card').forEach(card => card.classList.remove('selected'));
             event.target.closest('.service-card').classList.add('selected');
-            
+
             const category = serviceCategories[categoryKey];
             formData.service = category.services.find(s => s.id === serviceId);
             document.getElementById('step2Next').disabled = false;
@@ -1517,7 +1528,7 @@
 
         function renderScheduleDays() {
             const grid = document.getElementById('calendarGrid');
-            
+
             if (!availableSchedules || availableSchedules.length === 0) {
                 grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">Carregando horários disponíveis...</div>';
                 return;
@@ -1525,12 +1536,12 @@
 
             const filteredSchedule = availableSchedules.filter(day => {
                 if (!day.horarios_livres || day.horarios_livres.length === 0) return false;
-                
+
                 if (formData.service && formData.service.duration) {
                     const filtered = filterAvailableTimeSlots(day.horarios_livres, formData.service.duration);
                     return filtered.length > 0;
                 }
-                
+
                 return true;
             });
 
@@ -1544,7 +1555,7 @@
                 const dayName = getDayName(dateObj);
                 const dayNumber = dateObj.getDate();
                 const monthName = getMonthName(dateObj);
-                
+
                 let availableCount = day.total_livres || day.horarios_livres.length;
                 if (formData.service && formData.service.duration) {
                     const filtered = filterAvailableTimeSlots(day.horarios_livres, formData.service.duration);
@@ -1583,24 +1594,24 @@
 
             document.querySelectorAll('.day-card').forEach(card => card.classList.remove('selected'));
             event.target.closest('.day-card').classList.add('selected');
-            
+
             formData.date = dayData.dia || dateStr;
             formData.dateFormatted = dateStr;
             formData.time = null;
-            
+
             document.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('selected'));
-            
+
             loadTimesFromSchedule(dayData.horarios_livres);
-            
+
             const timeSection = document.getElementById('timeSection');
             timeSection.classList.add('active');
-            
+
             setTimeout(() => {
                 timeSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
-            
+
             document.getElementById('step3Next').disabled = true;
-            
+
             if (formData.service) {
                 document.getElementById('durationInfo').style.display = 'block';
                 document.getElementById('durationText').textContent = formatDuration(formData.service.duration);
@@ -1610,16 +1621,16 @@
         function loadTimesFromSchedule(times) {
             const grid = document.getElementById('timeGrid');
             let availableTimes = times;
-            
+
             if (formData.service && formData.service.duration) {
                 availableTimes = filterAvailableTimeSlots(times, formData.service.duration);
             }
-            
+
             if (availableTimes.length === 0) {
                 grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">Nenhum horário disponível neste dia para a duração deste serviço. Escolha outro dia.</div>';
                 return;
             }
-            
+
             grid.innerHTML = availableTimes.map(time => `
                 <div class="time-slot" onclick="selectTime('${time}')">${time}</div>
             `).join('');
@@ -1726,9 +1737,9 @@
             try {
                 const docRef = await db.collection('appointments').add(appointmentData);
                 console.log('✅ Agendamento salvo com sucesso no Firestore com ID:', docRef.id);
-                
+
                 alert(`✅ Solicitação realizada com sucesso!\n\n📱 Você receberá uma confirmação no WhatsApp em breve.\n\n📞 Contato: +55 55 99154-6257\n📍 Alfredo Brenner 198, Cruz Alta\n\nObrigada por confiar no meu trabalho! 💖`);
-                
+
                 formData = { name: '', phone: '', service: null, date: null, dateFormatted: null, time: null };
                 goToStep(1);
                 document.getElementById('clientName').value = '';
@@ -1739,7 +1750,7 @@
                 document.getElementById('timeSection').classList.remove('active');
                 document.getElementById('step1Next').disabled = true;
                 document.getElementById('step2Next').disabled = true;
-                
+
             } catch (error) {
                 console.error('❌ Erro ao salvar agendamento no Firestore:', error);
                 alert('❌ Erro ao salvar agendamento. Por favor, tente novamente ou entre em contato diretamente pelo WhatsApp: +55 55 99154-6257');
@@ -1769,7 +1780,7 @@
         function validateAdminPassword() {
             const password = document.getElementById('adminPassword').value;
             const errorDiv = document.getElementById('adminPasswordError');
-            
+
             if (password === ADMIN_PASSWORD) {
                 document.getElementById('adminAuth').style.display = 'none';
                 document.getElementById('adminServices').classList.add('active');
@@ -1788,9 +1799,9 @@
         function switchAdminTab(tab) {
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
-            
+
             event.target.classList.add('active');
-            
+
             if (tab === 'prices') {
                 document.getElementById('adminPricesTab').classList.add('active');
             } else if (tab === 'manage') {
@@ -1802,18 +1813,18 @@
         function loadAdminPrices() {
             const container = document.getElementById('adminServicesContent');
             let html = '';
-            
+
             Object.keys(serviceCategories).forEach(categoryKey => {
                 const category = serviceCategories[categoryKey];
-                
+
                 if (category.services.length === 0) return;
-                
+
                 html += `
                     <div class="admin-category-title">
                         ${category.emoji} ${category.name}
                     </div>
                 `;
-                
+
                 category.services.forEach(service => {
                     html += `
                         <div class="admin-service-item">
@@ -1842,11 +1853,11 @@
                     `;
                 });
             });
-            
+
             if (html === '') {
                 html = '<div style="text-align: center; padding: 40px; color: #666;">Nenhum serviço cadastrado ainda.</div>';
             }
-            
+
             container.innerHTML = html;
         }
 
@@ -1854,32 +1865,33 @@
             const newPriceInput = document.getElementById(`price_${serviceId}`);
             const newPrice = parseFloat(newPriceInput.value);
             const btn = document.getElementById(`btn_${serviceId}`);
-            
-            if (!newPrice || newPrice < 0) {
+
+            if (newPrice === null || newPrice === undefined || newPrice < 0) {
                 alert('Por favor, digite um valor válido!');
                 return;
             }
-            
+
+
             btn.disabled = true;
             btn.innerHTML = '<span class="loading-spinner"></span>';
-            
+
             try {
                 await db.collection('services').doc(serviceId).update({
                     price: newPrice
                 });
-                
+
                 Object.keys(serviceCategories).forEach(categoryKey => {
                     const service = serviceCategories[categoryKey].services.find(s => s.id === serviceId);
                     if (service) {
                         service.price = newPrice;
                     }
                 });
-                
+
                 loadAdminPrices();
                 loadServices();
-                
+
                 alert(`✅ Preço atualizado com sucesso!\n\nNovo valor: R$ ${newPrice.toFixed(2)}`);
-                
+
             } catch (error) {
                 console.error('Erro ao atualizar preço:', error);
                 alert('❌ Erro ao atualizar preço. Tente novamente.');
@@ -1891,12 +1903,12 @@
         function loadServiceList() {
             const container = document.getElementById('serviceList');
             let html = '';
-            
+
             Object.keys(serviceCategories).forEach(categoryKey => {
                 const category = serviceCategories[categoryKey];
-                
+
                 if (category.services.length === 0) return;
-                
+
                 html += `
                     <div style="margin-bottom: 30px;">
                         <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px; padding-left: 5px; border-left: 4px solid #667eea;">
@@ -1924,11 +1936,11 @@
                     </div>
                 `;
             });
-            
+
             if (html === '') {
                 html = '<div style="text-align: center; padding: 40px; color: #666;">Nenhum serviço cadastrado ainda. Crie seu primeiro serviço acima!</div>';
             }
-            
+
             container.innerHTML = html;
         }
 
@@ -1940,32 +1952,32 @@
             const duration = parseInt(document.getElementById('serviceDuration').value);
             const sessions = document.getElementById('serviceSessions').value.trim();
             const editId = document.getElementById('editServiceId').value;
-            
+
             if (!category) {
                 alert('Por favor, selecione uma categoria!');
                 return;
             }
-            
+
             if (!name) {
                 alert('Por favor, digite o nome do serviço!');
                 return;
             }
-            
+
             if (!desc) {
                 alert('Por favor, digite a descrição!');
                 return;
             }
-            
+
             if (isNaN(price) || price < 0) {
                 alert('Por favor, digite um valor válido!');
                 return;
             }
-            
+
             if (isNaN(duration) || duration < 10) {
                 alert('Por favor, digite uma duração válida (mínimo 10 minutos)!');
                 return;
             }
-            
+
             const serviceData = {
                 category: category,
                 name: name,
@@ -1973,11 +1985,11 @@
                 price: price,
                 duration: duration
             };
-            
+
             if (sessions && parseInt(sessions) > 0) {
                 serviceData.sessions = parseInt(sessions);
             }
-            
+
             try {
                 if (editId) {
                     await db.collection('services').doc(editId).update(serviceData);
@@ -1986,12 +1998,12 @@
                     await db.collection('services').add(serviceData);
                     alert('✅ Serviço cadastrado com sucesso!');
                 }
-                
+
                 clearServiceForm();
                 await loadServicesFromFirestore();
                 loadServiceList();
                 loadAdminPrices();
-                
+
             } catch (error) {
                 console.error('Erro ao salvar serviço:', error);
                 alert('❌ Erro ao salvar serviço. Tente novamente.');
@@ -2001,7 +2013,7 @@
         function editService(serviceId) {
             let service = null;
             let categoryKey = null;
-            
+
             Object.keys(serviceCategories).forEach(key => {
                 const found = serviceCategories[key].services.find(s => s.id === serviceId);
                 if (found) {
@@ -2009,9 +2021,9 @@
                     categoryKey = key;
                 }
             });
-            
+
             if (!service) return;
-            
+
             document.getElementById('serviceCategory').value = service.category || categoryKey;
             document.getElementById('serviceName').value = service.name;
             document.getElementById('serviceDesc').value = service.desc;
@@ -2019,11 +2031,11 @@
             document.getElementById('serviceDuration').value = service.duration;
             document.getElementById('serviceSessions').value = service.sessions || '';
             document.getElementById('editServiceId').value = serviceId;
-            
+
             document.getElementById('formTitle').textContent = '✏️ Editar Serviço';
             document.getElementById('saveButtonText').textContent = '💾 Atualizar Serviço';
             document.getElementById('cancelEditBtn').style.display = 'block';
-            
+
             document.querySelector('.service-form').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -2039,7 +2051,7 @@
             document.getElementById('serviceDuration').value = '';
             document.getElementById('serviceSessions').value = '';
             document.getElementById('editServiceId').value = '';
-            
+
             document.getElementById('formTitle').textContent = '➕ Adicionar Novo Serviço';
             document.getElementById('saveButtonText').textContent = '💾 Salvar Serviço';
             document.getElementById('cancelEditBtn').style.display = 'none';
@@ -2049,16 +2061,16 @@
             if (!confirm(`Tem certeza que deseja excluir o serviço:\n\n"${serviceName}"?\n\nEsta ação não pode ser desfeita!`)) {
                 return;
             }
-            
+
             try {
                 await db.collection('services').doc(serviceId).delete();
-                
+
                 alert('✅ Serviço excluído com sucesso!');
-                
+
                 await loadServicesFromFirestore();
                 loadServiceList();
                 loadAdminPrices();
-                
+
             } catch (error) {
                 console.error('Erro ao excluir serviço:', error);
                 alert('❌ Erro ao excluir serviço. Tente novamente.');
@@ -2080,4 +2092,5 @@
         window.cancelEdit = cancelEdit;
     </script>
 </body>
+
 </html>

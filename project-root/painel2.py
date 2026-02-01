@@ -121,9 +121,8 @@ class QRCodeWindow:
 
     def _monitor_qr(self):
         """Monitora arquivo QR Code"""
-        qr_path = 'data/whatsapp_qr.png' if os.path.exists(
-            'data') else 'whatsapp_qr.png'
-        last_mod = 0
+        qr_path = 'data/image/whatsapp_qr.png'  # ✅ CORRIGIDO
+        last_mod = 0                              # ✅ CORRIGIDO
 
         while True:
             try:
@@ -240,7 +239,7 @@ class PriMalzoniControlPanel:
                 2, False), COLORS['info']),
             ("📅 Capturar 3 Semanas", lambda: self.run_hours(
                 3, False), COLORS['success']),
-            ("📅 Capturar 4 Semanas", lambda: self.run_hours(
+            ("📅 Capturar 4 Semanas (1 Mês)", lambda: self.run_hours(
                 4, False), COLORS['secondary']),
             ("🔄 Loop 5min (3sem)", lambda: self.run_hours(
                 3, True, 5), COLORS['warning']),
@@ -529,8 +528,8 @@ class PriMalzoniControlPanel:
     def _start_all_sequence(self):
         """Sequência de inicialização"""
         services = [
-            ('servidor', 4), 
-            ('ngrok', 6), 
+            ('servidor', 4),
+            ('ngrok', 6),
             ('chatbot', 5)
         ]
 
@@ -569,14 +568,44 @@ class PriMalzoniControlPanel:
                 self.log_message("⚠️ Porta 8000 já está em uso", "WARNING")
                 return
 
-            self.processes['servidor'] = Utils.run_subprocess(
-                ['python', '-m', 'http.server', '8000'], "Servidor HTTP"
-            )
-            self.status['servidor'] = True
-            self.log_message(
-                "✅ Servidor HTTP iniciado na porta 8000", "SUCCESS")
+            # Caminho absoluto para server.js
+            server_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'server.js')
+            
+            if os.path.exists(server_path):
+                self.log_message(f"📂 Encontrado: {server_path}", "INFO")
+                
+                # Usar servidor Node.js
+                startupinfo = None
+                if os.name == 'nt':
+                    startupinfo = subprocess.STARTUPINFO()
+                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                    startupinfo.wShowWindow = subprocess.SW_HIDE
+                
+                self.processes['servidor'] = subprocess.Popen(
+                    ['node', server_path],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    startupinfo=startupinfo,
+                    cwd=os.path.dirname(server_path)  # ← Define diretório de trabalho
+                )
+                
+                self.status['servidor'] = True
+                self.log_message("✅ Servidor Node.js iniciado na porta 8000", "SUCCESS")
+                self.log_message("🔓 Ngrok bypass ATIVO", "SUCCESS")
+            else:
+                self.log_message(f"⚠️ server.js não encontrado em: {server_path}", "WARNING")
+                
+                # Fallback para Python HTTP server
+                self.processes['servidor'] = Utils.run_subprocess(
+                    ['python', '-m', 'http.server', '8000'], "Servidor HTTP"
+                )
+                self.status['servidor'] = True
+                self.log_message("✅ Servidor Python iniciado na porta 8000", "SUCCESS")
+                self.log_message("⚠️ Ngrok vai mostrar tela de aviso", "WARNING")
+            
         except Exception as e:
             self.log_message(f"❌ Erro ao iniciar servidor: {str(e)}", "ERROR")
+
 
     def stop_servidor(self):
         """Para servidor HTTP"""
@@ -594,10 +623,13 @@ class PriMalzoniControlPanel:
         self.log_message("⏹️ Servidor HTTP parado", "INFO")
 
     def start_chatbot(self):
-        """Inicia chatbot"""
+        """Inicia chatbot WhatsApp"""
         try:
-            if not os.path.exists('server.js'):
-                self.log_message("❌ Arquivo server.js não encontrado", "ERROR")
+            chatbot_path = 'chatbot.js' 
+
+            if not os.path.exists(chatbot_path):
+                self.log_message(
+                    f"❌ Arquivo {chatbot_path} não encontrado", "ERROR")
                 return
 
             try:
@@ -607,8 +639,13 @@ class PriMalzoniControlPanel:
                 self.log_message("❌ Node.js não encontrado", "ERROR")
                 return
 
-            if not self.qr_window or not hasattr(self.qr_window, 'window'):
-                self.qr_window = QRCodeWindow(self)
+            # NÃO mostrar QR se já conectado (verificar sessão)
+            auth_path = 'data/.wwebjs_auth'
+            if os.path.exists(auth_path):
+                self.log_message("✅ Sessão WhatsApp encontrada", "INFO")
+            else:
+                if not self.qr_window or not hasattr(self.qr_window, 'window'):
+                    self.qr_window = QRCodeWindow(self)
 
             startupinfo = None
             if os.name == 'nt':
@@ -617,7 +654,7 @@ class PriMalzoniControlPanel:
                 startupinfo.wShowWindow = subprocess.SW_HIDE
 
             self.processes['chatbot'] = subprocess.Popen(
-                ['node', 'server.js'],
+                ['node', chatbot_path],
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 universal_newlines=True, bufsize=1, encoding='utf-8',
                 errors='ignore', startupinfo=startupinfo
@@ -626,7 +663,7 @@ class PriMalzoniControlPanel:
             threading.Thread(target=self._monitor_chatbot, daemon=True).start()
             self.status['chatbot'] = True
             self.log_message(
-                "✅ ChatBot iniciado - Aguardando QR Code...", "SUCCESS")
+                "✅ ChatBot iniciado", "SUCCESS")
         except Exception as e:
             self.log_message(f"❌ Erro ao iniciar chatbot: {str(e)}", "ERROR")
 

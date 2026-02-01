@@ -1,16 +1,36 @@
-// Bot WhatsApp - Pri Malzoni Estética (VERSÃO ATUALIZADA)
+// chatbot.js - Pri Malzoni Estética - VERSÃO COM ENCERRAMENTO
+// Localização: project-root/chatbot.js
 
-const qrcode = require('qrcode-terminal');
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const fs = require('fs');
 const path = require('path');
 const qr = require('qrcode');
 
-// ==================== CONFIGURAÇÃO DO CLIENT ====================
+// ==================== CONFIGURAÇÃO ====================
+
+const DATA_DIR = path.join(__dirname, 'data');
+const IMAGE_DIR = path.join(DATA_DIR, 'image');
+const QR_PATH = path.join(IMAGE_DIR, 'whatsapp_qr.png');
+const ROTAS_PATH = path.join(DATA_DIR, 'rotas.json');
+
+// Criar diretórios se não existirem
+[DATA_DIR, IMAGE_DIR].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+        console.log(`✅ Diretório criado: ${dir}`);
+    }
+});
+
+console.log('📂 Configuração de pastas:');
+console.log('  QR será salvo em:', QR_PATH);
+console.log('  Rotas em:', ROTAS_PATH);
+
+// ==================== CLIENT CONFIG ====================
 
 const client = new Client({
     authStrategy: new LocalAuth({
-        clientId: 'primalzoni-bot'
+        clientId: 'primalzoni-bot',
+        dataPath: path.join(DATA_DIR, '.wwebjs_auth')
     }),
     puppeteer: {
         headless: true,
@@ -26,31 +46,43 @@ const client = new Client({
     }
 });
 
-// Carrega configurações do arquivo rotas.json
+// ==================== CARREGA URLS ====================
+
 let SISTEMA_WEB_URL = 'http://localhost:8000';
 const LINK_APP_BELEZA = 'https://sites.appbeleza.com.br/primalzonimicropigme';
 
-try {
-    if (fs.existsSync('rotas.json')) {
-        const rotas = JSON.parse(fs.readFileSync('rotas.json', 'utf8'));
-        SISTEMA_WEB_URL = rotas.ngrok_url || rotas.local_url || SISTEMA_WEB_URL;
-        console.log(`📡 URL do sistema: ${SISTEMA_WEB_URL}`);
+function loadUrls() {
+    try {
+        if (fs.existsSync(ROTAS_PATH)) {
+            const rotas = JSON.parse(fs.readFileSync(ROTAS_PATH, 'utf8'));
+            SISTEMA_WEB_URL = rotas.ngrok_url || rotas.local_url || SISTEMA_WEB_URL;
+            console.log(`📡 URL do sistema: ${SISTEMA_WEB_URL}`);
+        }
+    } catch (error) {
+        console.log('⚠️ Erro ao carregar rotas.json, usando URL padrão');
     }
-} catch (error) {
-    console.log('⚠️ CONFIG_ERROR: Erro ao carregar rotas.json, usando URL padrão');
 }
+
+loadUrls();
 
 // ==================== EVENTOS DE CONEXÃO ====================
 
+let lastQrGeneration = 0;
+const QR_GENERATION_INTERVAL = 60000; // 1 minuto
+
 client.on('qr', async (qrString) => {
-    console.log('📱 QR_GENERATED - QR Code gerado!');
+    const now = Date.now();
     
-    // Exibir QR no terminal
-    qrcode.generate(qrString, { small: true });
+    if (now - lastQrGeneration < QR_GENERATION_INTERVAL) {
+        console.log('⏭️ QR recente, aguardando intervalo de 1 minuto...');
+        return;
+    }
+    
+    lastQrGeneration = now;
+    console.log('QR_GENERATED');
     
     try {
-        const qrPath = path.join(__dirname, 'whatsapp_qr.png');
-        await qr.toFile(qrPath, qrString, {
+        await qr.toFile(QR_PATH, qrString, {
             color: {
                 dark: '#000000',
                 light: '#FFFFFF'
@@ -58,33 +90,44 @@ client.on('qr', async (qrString) => {
             width: 300
         });
         
-        console.log(`✅ QR_IMAGE_SAVED: ${qrPath}`);
+        console.log('QR_IMAGE_SAVED');
+        console.log(`📸 QR Code salvo em: ${QR_PATH}`);
         
     } catch (error) {
-        console.log('❌ QR_ERROR:', error.message);
+        console.log('QR_ERROR:', error.message);
     }
 });
 
 client.on('authenticated', () => {
-    console.log('✅ WHATSAPP_AUTH_SUCCESS - Autenticado com sucesso');
+    console.log('WHATSAPP_AUTH_SUCCESS');
+    console.log('✅ Autenticado com sucesso');
 });
 
 client.on('ready', () => {
-    console.log('✅ WHATSAPP_CONNECTED - WhatsApp conectado!');
-    console.log('🤖 Bot está ativo e pronto para responder');
-    console.log('📱 Número conectado:', client.info.wid.user);
+    console.log('WHATSAPP_CONNECTED');
+    console.log('✅ WhatsApp conectado - Bot ativo!');
+    console.log('📱 Número:', client.info.wid.user);
+    
+    try {
+        if (fs.existsSync(QR_PATH)) {
+            fs.unlinkSync(QR_PATH);
+            console.log('🗑️ QR Code removido após conexão bem-sucedida');
+        }
+    } catch (error) {
+        console.log('⚠️ Erro ao remover QR:', error.message);
+    }
 });
 
 client.on('auth_failure', (msg) => {
-    console.error('❌ WHATSAPP_AUTH_ERROR:', msg);
+    console.log('WHATSAPP_AUTH_ERROR:', msg);
 });
 
 client.on('disconnected', (reason) => {
-    console.log('⚠️ WHATSAPP_DISCONNECTED:', reason);
+    console.log('WHATSAPP_DISCONNECTED:', reason);
 });
 
-client.on('message_ack', (msg, ack) => {
-    console.log(`📬 ACK recebido: ${ack}`);
+client.on('loading_screen', (percent, message) => {
+    console.log('LOADING:', percent, message);
 });
 
 // ==================== DADOS DOS SERVIÇOS ====================
@@ -121,6 +164,9 @@ const servicos = {
 // ==================== SISTEMA DE CONVERSAS ====================
 
 let conversasAtivas = {};
+let conversasEncerradas = new Set(); // ← NOVO: Armazena números encerrados
+
+const PALAVRA_CHAVE_REATIVAR = 'atendimento'; // ← Palavra-chave para reativar
 
 const ESTADOS = {
     INICIAL: 'inicial',
@@ -128,7 +174,8 @@ const ESTADOS = {
     AGUARDANDO_PERIODO: 'aguardando_periodo',
     AGUARDANDO_SERVICO: 'aguardando_servico',
     MOSTRANDO_OPCOES: 'mostrando_opcoes',
-    AGUARDANDO_CONTATO: 'aguardando_contato'
+    AGUARDANDO_CONTATO: 'aguardando_contato',
+    ENCERRADO: 'encerrado' // ← NOVO estado
 };
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -140,12 +187,22 @@ function resetarConversa(numeroTelefone) {
     console.log(`🔄 Conversa resetada: ${numeroTelefone}`);
 }
 
+function encerrarConversa(numeroTelefone) {
+    conversasEncerradas.add(numeroTelefone);
+    if (conversasAtivas[numeroTelefone]) {
+        conversasAtivas[numeroTelefone].estado = ESTADOS.ENCERRADO;
+    }
+    console.log(`🔒 Conversa encerrada: ${numeroTelefone}`);
+}
+
+function reativarConversa(numeroTelefone) {
+    conversasEncerradas.delete(numeroTelefone);
+    resetarConversa(numeroTelefone);
+    console.log(`🔓 Conversa reativada: ${numeroTelefone}`);
+}
+
 async function iniciarConversa(msg) {
-    const chat = await msg.getChat();
-    
     await delay(1000);
-    await chat.sendStateTyping();
-    await delay(2000);
     
     await client.sendMessage(msg.from, 
         `Olá, seja muito bem-vinda 🤍\n\n` +
@@ -163,12 +220,9 @@ async function iniciarConversa(msg) {
     console.log(`🆕 Nova conversa iniciada: ${msg.from}`);
 }
 
-async function processarNome(msg, mensagem, conversa, chat) {
+async function processarNome(msg, mensagem, conversa) {
     await delay(1000);
-    await chat.sendStateTyping();
-    await delay(2000);
     
-    // Salvar nome
     conversa.dados.nome = mensagem;
     
     await client.sendMessage(msg.from,
@@ -184,10 +238,9 @@ async function processarNome(msg, mensagem, conversa, chat) {
     console.log(`👤 Nome registrado: ${mensagem}`);
 }
 
-async function processarPeriodo(msg, mensagem, conversa, chat) {
+async function processarPeriodo(msg, mensagem, conversa) {
     const mensagemLower = mensagem.toLowerCase().trim();
     
-    // Validar período
     if (!mensagemLower.includes('manhã') && !mensagemLower.includes('manha') && 
         !mensagemLower.includes('tarde')) {
         await client.sendMessage(msg.from,
@@ -198,31 +251,25 @@ async function processarPeriodo(msg, mensagem, conversa, chat) {
     }
     
     await delay(1000);
-    await chat.sendStateTyping();
-    await delay(2500);
     
-    // Salvar período
     if (mensagemLower.includes('manhã') || mensagemLower.includes('manha')) {
         conversa.dados.periodo = 'Manhã (8h às 12h)';
     } else {
         conversa.dados.periodo = 'Tarde (14h às 18h)';
     }
     
-    await mostrarServicos(msg, conversa, chat);
+    await mostrarServicos(msg, conversa);
     
     console.log(`⏰ Período registrado: ${conversa.dados.periodo}`);
 }
 
-async function mostrarServicos(msg, conversa, chat) {
+async function mostrarServicos(msg, conversa) {
     await delay(1000);
-    await chat.sendStateTyping();
-    await delay(2000);
     
     let mensagemServicos = `Perfeito 🤍\n\n` +
         `Agora me diga, por gentileza,\n` +
         `qual procedimento você deseja realizar:\n\n`;
     
-    // Listar todos os serviços
     for (let i = 1; i <= 26; i++) {
         const servico = servicos[i];
         mensagemServicos += `*${i}* - ${servico.nome} ${servico.preco}\n`;
@@ -233,13 +280,46 @@ async function mostrarServicos(msg, conversa, chat) {
     
     await client.sendMessage(msg.from, mensagemServicos);
     
+    // ✅ ENVIAR PDF DO CATÁLOGO
+    await enviarCatalogo(msg.from);
+    
     conversa.estado = ESTADOS.AGUARDANDO_SERVICO;
 }
 
-async function processarServico(msg, mensagem, conversa, chat) {
+// ==================== FUNÇÃO PARA ENVIAR CATÁLOGO ====================
+
+async function enviarCatalogo(numeroTelefone) {
+    try {
+        await delay(1500); // Aguarda um pouco antes de enviar
+        
+        const catalogoPath = path.join(__dirname, 'src', 'public', 'documents', 'Catalago.pdf');
+        
+        // Verifica se o arquivo existe
+        if (!fs.existsSync(catalogoPath)) {
+            console.log(`⚠️ Catálogo não encontrado em: ${catalogoPath}`);
+            return;
+        }
+        
+        console.log(`📄 Enviando catálogo para ${numeroTelefone}...`);
+        
+        // Cria objeto de mídia
+        const media = MessageMedia.fromFilePath(catalogoPath);
+        
+        // Envia o PDF com legenda
+        await client.sendMessage(numeroTelefone, media, {
+            caption: '📖 *Catálogo Pri Malzoni Estética*\n\nConfira todos os nossos serviços! ✨'
+        });
+        
+        console.log(`✅ Catálogo enviado com sucesso!`);
+        
+    } catch (error) {
+        console.log(`❌ Erro ao enviar catálogo: ${error.message}`);
+    }
+}
+
+async function processarServico(msg, mensagem, conversa) {
     const numeroServico = parseInt(mensagem.trim());
     
-    // Validar número do serviço
     if (isNaN(numeroServico) || numeroServico < 1 || numeroServico > 26) {
         await client.sendMessage(msg.from,
             `Por favor, digite um número válido entre *1* e *26* 🤍`
@@ -248,23 +328,20 @@ async function processarServico(msg, mensagem, conversa, chat) {
     }
     
     await delay(1000);
-    await chat.sendStateTyping();
-    await delay(2500);
     
-    // Salvar serviço escolhido
     const servicoEscolhido = servicos[numeroServico];
     conversa.dados.servico = `${servicoEscolhido.nome} - ${servicoEscolhido.preco}`;
     conversa.dados.numeroServico = numeroServico;
     
-    await mostrarOpcoesAgendamento(msg, conversa, chat);
+    await mostrarOpcoesAgendamento(msg, conversa);
     
     console.log(`💆 Serviço escolhido: ${conversa.dados.servico}`);
 }
 
-async function mostrarOpcoesAgendamento(msg, conversa, chat) {
+async function mostrarOpcoesAgendamento(msg, conversa) {
+    loadUrls();
+    
     await delay(1000);
-    await chat.sendStateTyping();
-    await delay(2000);
     
     const mensagemOpcoes = 
         `Ótimo ✨\n\n` +
@@ -278,23 +355,24 @@ async function mostrarOpcoesAgendamento(msg, conversa, chat) {
         `👉 Caso queira falar diretamente com a Pri,\n` +
         `pedimos que aguarde ela finalizar os atendimentos do dia 🤍\n\n` +
         `Assim que possível, ela retorna com toda atenção que você merece por ordem de sequência de solicitação.\n\n` +
-        `━━━━━━━━━━━━━━━━━━\n` +
+        `━━━━━━━━━━━━━━━\n` +
         `📋 *Resumo da sua solicitação:*\n` +
         `👤 Nome: ${conversa.dados.nome}\n` +
         `⏰ Período: ${conversa.dados.periodo}\n` +
         `💆 Serviço: ${conversa.dados.servico}\n` +
-        `━━━━━━━━━━━━━━━━━━\n\n` +
-        `Digite *menu* para recomeçar ou *sair* para encerrar 🤍`;
+        `━━━━━━━━━━━━━━━\n\n` +
+        `✅ Seu atendimento foi registrado!\n\n` +
+        `_Se precisar de um novo atendimento, digite *${PALAVRA_CHAVE_REATIVAR}*_ 🤍`;
     
     await client.sendMessage(msg.from, mensagemOpcoes);
     
-    conversa.estado = ESTADOS.AGUARDANDO_CONTATO;
+    // ← NOVO: Encerra a conversa após mostrar o resumo
+    encerrarConversa(msg.from);
     
-    // Log completo dos dados coletados
-    console.log(`📊 Dados completos coletados:`, conversa.dados);
+    console.log(`📊 Dados completos coletados e conversa encerrada:`, conversa.dados);
 }
 
-async function processarComandos(msg, mensagem, conversa, chat) {
+async function processarComandos(msg, mensagem, conversa) {
     const mensagemLower = mensagem.toLowerCase().trim();
     
     if (mensagemLower === 'menu' || mensagemLower === 'recomeçar' || mensagemLower === 'começar') {
@@ -306,9 +384,9 @@ async function processarComandos(msg, mensagem, conversa, chat) {
             `Obrigada pelo contato! 🤍\n\n` +
             `Estamos à disposição sempre que precisar.\n\n` +
             `*Pri Malzoni Estética* ✨\n\n` +
-            `_Digite qualquer mensagem para iniciar um novo atendimento_`
+            `_Digite *${PALAVRA_CHAVE_REATIVAR}* para iniciar um novo atendimento_`
         );
-        resetarConversa(msg.from);
+        encerrarConversa(msg.from);
         console.log(`👋 Conversa encerrada`);
     } else {
         await client.sendMessage(msg.from,
@@ -326,49 +404,81 @@ async function processarComandos(msg, mensagem, conversa, chat) {
 
 async function handleMessage(msg) {
     try {
-        console.log(`🔔 MENSAGEM RECEBIDA de ${msg.from}: "${msg.body}"`);
+        // ============ FILTROS CRÍTICOS ============
         
-        // Ignorar mensagens de grupos
-        if (!msg.from.endsWith('@c.us')) {
-            console.log(`⏭️ Ignorando mensagem de grupo`);
+        // 1. IGNORAR GRUPOS
+        if (msg.from.includes('@g.us')) {
+            console.log(`⏭️ Ignorando grupo: ${msg.from}`);
             return;
         }
         
-        // Ignorar mensagens do próprio bot
+        // 2. IGNORAR NEWSLETTERS/CHANNELS
+        if (msg.from.includes('@newsletter')) {
+            console.log(`⏭️ Ignorando newsletter: ${msg.from}`);
+            return;
+        }
+        
+        // 3. IGNORAR BROADCAST
+        if (msg.from.includes('@broadcast')) {
+            console.log(`⏭️ Ignorando broadcast`);
+            return;
+        }
+        
+        // 4. IGNORAR MENSAGENS PRÓPRIAS
         if (msg.fromMe) {
             console.log(`⏭️ Ignorando mensagem própria`);
             return;
         }
         
+        // 5. IGNORAR MENSAGENS VAZIAS
+        if (!msg.body || msg.body.trim() === '') {
+            console.log(`⏭️ Ignorando mensagem vazia de ${msg.from}`);
+            return;
+        }
+        
         const mensagem = msg.body.trim();
+        const mensagemLower = mensagem.toLowerCase();
+        
+        // ============ VERIFICAR SE CONVERSA ESTÁ ENCERRADA ============
+        if (conversasEncerradas.has(msg.from)) {
+            // Verificar palavra-chave para reativar
+            if (mensagemLower === PALAVRA_CHAVE_REATIVAR) {
+                console.log(`🔓 Reativando conversa de ${msg.from}`);
+                reativarConversa(msg.from);
+                await iniciarConversa(msg);
+                return;
+            } else {
+                console.log(`🔒 Conversa encerrada, ignorando mensagem de ${msg.from}: "${mensagem}"`);
+                return; // Ignora qualquer outra mensagem
+            }
+        }
+        
+        console.log(`🔔 MENSAGEM VÁLIDA de ${msg.from}: "${mensagem}"`);
+        
         const conversa = conversasAtivas[msg.from];
         
-        // Se não há conversa ativa, iniciar nova
         if (!conversa) {
             await iniciarConversa(msg);
             return;
         }
         
-        const chat = await msg.getChat();
-        
         console.log(`📊 Estado atual: ${conversa.estado}`);
         
-        // Processar baseado no estado
         switch (conversa.estado) {
             case ESTADOS.AGUARDANDO_NOME:
-                await processarNome(msg, mensagem, conversa, chat);
+                await processarNome(msg, mensagem, conversa);
                 break;
                 
             case ESTADOS.AGUARDANDO_PERIODO:
-                await processarPeriodo(msg, mensagem, conversa, chat);
+                await processarPeriodo(msg, mensagem, conversa);
                 break;
                 
             case ESTADOS.AGUARDANDO_SERVICO:
-                await processarServico(msg, mensagem, conversa, chat);
+                await processarServico(msg, mensagem, conversa);
                 break;
                 
             case ESTADOS.AGUARDANDO_CONTATO:
-                await processarComandos(msg, mensagem, conversa, chat);
+                await processarComandos(msg, mensagem, conversa);
                 break;
                 
             default:
@@ -378,38 +488,33 @@ async function handleMessage(msg) {
         }
         
     } catch (error) {
-        console.error('❌ ERRO no handler de mensagens:', error);
+        console.error('❌ ERRO no handleMessage:', error.message);
         console.error('Stack:', error.stack);
         
         try {
-            await client.sendMessage(msg.from, 
-                `😔 Desculpe, ocorreu um erro.\n\n` +
-                `Digite *menu* para recomeçar 🤍`
-            );
             resetarConversa(msg.from);
-        } catch (sendError) {
-            console.error('❌ Erro ao enviar mensagem de erro:', sendError);
+        } catch (resetError) {
+            console.error('❌ Erro ao resetar conversa:', resetError.message);
         }
     }
 }
 
-// ✅ Usar APENAS message_create
 client.on('message_create', handleMessage);
 
 // ==================== INICIALIZAÇÃO ====================
 
-console.log('[+] Iniciando Bot do WhatsApp - Pri Malzoni Estética...');
-console.log('{...} Aguardando autenticação...');
-console.log('{...} Isso pode levar alguns segundos...\n');
+console.log('🚀 Iniciando Bot WhatsApp - Pri Malzoni Estética...');
+console.log('📱 Aguardando autenticação...\n');
 
 client.initialize();
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('[X] Unhandled Rejection:', reason);
+    console.error('❌ Unhandled Rejection:', reason);
 });
 
 process.on('uncaughtException', (error) => {
-    console.error('[X] Uncaught Exception:', error);
+    console.error('❌ Uncaught Exception:', error);
 });
 
-console.log('\n✨ Bot configurado e pronto para inicializar!\n');
+console.log('\n✨ Bot configurado e pronto!\n');
+console.log(`🔑 Palavra-chave para reativar: "${PALAVRA_CHAVE_REATIVAR}"`);

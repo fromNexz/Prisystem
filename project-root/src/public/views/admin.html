@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -422,6 +423,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="passwordModal" class="password-modal active">
         <div class="password-content">
@@ -430,7 +432,8 @@
             <input type="password" id="passwordInput" class="password-input" placeholder="••••••••" maxlength="20">
             <div id="passwordError" class="password-error">Senha incorreta. Tente novamente.</div>
             <div style="display: flex; gap: 15px;">
-                <button class="password-btn" style="background: #f8f9fa; color: #666;" onclick="goBackToIndex()">Voltar</button>
+                <button class="password-btn" style="background: #f8f9fa; color: #666;"
+                    onclick="goBackToIndex()">Voltar</button>
                 <button class="password-btn primary" onclick="verifyPassword()">Entrar</button>
             </div>
         </div>
@@ -484,7 +487,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="copyPasteModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -513,7 +516,8 @@
                 </div>
 
                 <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">💬 Mensagem para WhatsApp:</label>
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">💬 Mensagem para
+                        WhatsApp:</label>
                     <textarea id="modalMessage" class="message-textarea" readonly></textarea>
                 </div>
 
@@ -527,7 +531,77 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
+
+    <script>
+        // ==================== AUTO-REFRESH SEM PEDIR SENHA ====================
+
+        // Salvar login no sessionStorage (dura enquanto aba estiver aberta)
+        function salvarLogin() {
+            sessionStorage.setItem('admin_logged_in', 'true');
+            sessionStorage.setItem('login_timestamp', Date.now());
+        }
+
+        // Verificar se já está logado
+        function verificarLogin() {
+            const logado = sessionStorage.getItem('admin_logged_in');
+            const timestamp = sessionStorage.getItem('login_timestamp');
+            const umDia = 24 * 60 * 60 * 1000; // 24 horas
+
+            // Se logado há menos de 24h, mantém sessão
+            if (logado === 'true' && timestamp && (Date.now() - timestamp < umDia)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        // No formulário de login, após verificar senha:
+        function fazerLogin() {
+            const senha = document.getElementById('senha').value;
+            const senhaCorreta = 'sua_senha_aqui'; // ou pegue do backend
+
+            if (senha === senhaCorreta) {
+                salvarLogin(); // ← Adicione isso após validar
+                mostrarPainelAdmin();
+            } else {
+                alert('Senha incorreta!');
+            }
+        }
+
+        // Ao carregar a página, verifica se já está logado
+        window.addEventListener('DOMContentLoaded', () => {
+            if (verificarLogin()) {
+                mostrarPainelAdmin(); // Mostra painel direto, sem pedir senha
+            } else {
+                mostrarFormularioLogin(); // Pede senha
+            }
+        });
+
+        // ==================== AUTO-REFRESH A CADA 30 SEGUNDOS ====================
+        // Atualiza dados sem recarregar a página inteira
+        setInterval(() => {
+            if (verificarLogin()) {
+                console.log('🔄 Atualizando dados...');
+                atualizarDadosAdmin(); // Função que busca novos dados
+            }
+        }, 30000); // 30 segundos
+
+        // Função para atualizar apenas os dados (sem recarregar página)
+        async function atualizarDadosAdmin() {
+            try {
+                // Exemplo: buscar novos agendamentos do Firebase
+                const snapshot = await getDocs(collection(db, 'agendamentos'));
+
+                // Atualizar a tabela/lista na tela
+                atualizarTabelaAgendamentos(snapshot);
+
+                console.log('✅ Dados atualizados!');
+            } catch (error) {
+                console.error('❌ Erro ao atualizar:', error);
+            }
+        }
+    </script>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBYo_laDj2ZfxWZLzCJvFaPq3sj0iOCfWM",
@@ -549,7 +623,7 @@
         function verifyPassword() {
             const input = document.getElementById('passwordInput');
             const error = document.getElementById('passwordError');
-            
+
             if (input.value.trim() === ADMIN_PASSWORD) {
                 isAuthenticated = true;
                 document.getElementById('passwordModal').classList.remove('active');
@@ -574,7 +648,7 @@
             try {
                 const snapshot = await db.collection('appointments').orderBy('createdAt', 'desc').get();
                 const appointments = [];
-                
+
                 snapshot.forEach(doc => {
                     appointments.push({
                         id: doc.id,
@@ -595,10 +669,10 @@
         function updateStats(appointments) {
             const pending = appointments.filter(apt => apt.status === 'pending').length;
             const confirmed = appointments.filter(apt => apt.status === 'confirmed').length;
-            
+
             const today = new Date().toLocaleDateString('pt-BR');
             const todayCount = appointments.filter(apt => apt.appointmentDate === today).length;
-            
+
             const revenue = appointments
                 .filter(apt => apt.status === 'confirmed')
                 .reduce((sum, apt) => sum + (apt.servicePrice || 0), 0);
@@ -722,7 +796,7 @@
 
                 const doc = await db.collection('appointments').doc(appointmentId).get();
                 const appointment = { id: doc.id, ...doc.data() };
-                
+
                 openCopyPasteModal(appointment);
                 loadAdminData();
             } catch (error) {
@@ -760,7 +834,7 @@
             document.getElementById('modalClientName').textContent = appointment.clientName;
             document.getElementById('modalClientPhone').textContent = appointment.clientPhone;
             document.getElementById('modalClientService').textContent = appointment.serviceName;
-            document.getElementById('modalClientDateTime').textContent = 
+            document.getElementById('modalClientDateTime').textContent =
                 `${appointment.appointmentDate} às ${appointment.appointmentTime}`;
 
             const message = `Olá ${appointment.clientName}! 👋
@@ -783,10 +857,10 @@ Te esperamos! Sua beleza merece ser realçada com carinho! 💖
 - Pri Malzoni Estética ✨`;
 
             document.getElementById('modalMessage').value = message;
-            
+
             const phoneClean = appointment.clientPhone.replace(/\D/g, '');
             document.getElementById('whatsappLink').href = `https://wa.me/55${phoneClean}?text=${encodeURIComponent(message)}`;
-            
+
             document.getElementById('copyPasteModal').classList.add('active');
             currentAppointmentId = appointment.id;
         }
@@ -810,7 +884,7 @@ Te esperamos! Sua beleza merece ser realçada com carinho! 💖
         function showTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
+
             event.target.classList.add('active');
             document.getElementById(`${tabName}Tab`).classList.add('active');
         }
@@ -820,4 +894,5 @@ Te esperamos! Sua beleza merece ser realçada com carinho! 💖
         }, 30000);
     </script>
 </body>
+
 </html>c

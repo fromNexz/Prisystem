@@ -1,7 +1,7 @@
 {
-  "ngrok_url": "https://df4c4b313ea3.ngrok-free.app",
+  "ngrok_url": "https://190f-2804-30c-2920-e200-34ab-cb16-7fef-7c21.ngrok-free.app",
   "local_url": "http://localhost:8000",
-  "last_updated": "2026-01-31T23:14:25.347637",
+  "last_updated": "2026-02-01T16:15:47.058524",
   "version": "3.0",
   "services": {
     "servidor": true,
