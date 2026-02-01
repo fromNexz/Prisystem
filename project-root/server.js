@@ -174,6 +174,15 @@ function iniciarServidor() {
         logger.success(`Servidor rodando na porta ${PORT}`);
         logger.info(`URL: http://localhost:${PORT}`);
         logger.info(`Admin: http://localhost:${PORT}/admin`);
+    }).on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            logger.error(`Porta ${PORT} ainda está em uso. Aguardando...`, err);
+            setTimeout(() => {
+                iniciarServidor(); // Tentar novamente após 5 segundos
+            }, 5000);
+        } else {
+            logger.error('Erro ao iniciar servidor', err);
+        }
     });
 }
 

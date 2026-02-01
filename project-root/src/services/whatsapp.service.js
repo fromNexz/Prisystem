@@ -11,6 +11,7 @@ class WhatsAppService {
         this.client = null;
         this.isReady = false;
         this.qrCode = null;
+        this.ignoreQR = false; // ✅ FLAG PARA IGNORAR QR APÓS CONECTADO
     }
 
     initialize() {
@@ -24,12 +25,18 @@ class WhatsAppService {
         });
 
         this.setupEventListeners();
-        
         this.client.initialize();
     }
 
     setupEventListeners() {
+        // ✅ EVENTO QR - COM FLAG PARA IGNORAR APÓS CONECTADO
         this.client.on('qr', async (qrString) => {
+            // Ignorar QR Code se já estiver conectado
+            if (this.ignoreQR) {
+                logger.debug('QR Code recebido, mas já conectado. Ignorando...');
+                return;
+            }
+
             logger.whatsapp('QR_GENERATED');
             this.qrCode = qrString;
             
@@ -43,29 +50,37 @@ class WhatsAppService {
                     width: 300
                 });
                 
-                logger.success(`QR Code salvo: ${qrPath}`);
+                logger.success(`✅ QR Code salvo: ${qrPath}`);
             } catch (error) {
-                logger.error('Erro ao gerar QR Code', error);
+                logger.error('❌ Erro ao gerar QR Code', error);
             }
         });
 
+        // ✅ EVENTO READY - ATIVAR FLAG DE IGNORE
         this.client.on('ready', () => {
             this.isReady = true;
+            this.ignoreQR = true;  // ✅ ATIVAR IGNORE APÓS CONECTADO
             logger.whatsapp('CONNECTED');
-            logger.success('WhatsApp conectado - Bot ativo!');
+            logger.success('✅ WhatsApp conectado e pronto!');
         });
 
         this.client.on('authenticated', () => {
             logger.whatsapp('AUTH_SUCCESS');
+            logger.info('✅ Autenticação bem-sucedida');
         });
 
         this.client.on('auth_failure', (msg) => {
-            logger.error('Falha na autenticação do WhatsApp', msg);
+            logger.error('❌ Falha na autenticação do WhatsApp', msg);
+            this.ignoreQR = false;  // ✅ RESETAR FLAG SE FALHAR
         });
 
+        // ✅ EVENTO DISCONNECT - RESETAR FLAG
         this.client.on('disconnected', (reason) => {
             this.isReady = false;
+            this.ignoreQR = false;  // ✅ RESETAR FLAG
+            this.qrCode = null;     // ✅ LIMPAR QR
             logger.whatsapp('DISCONNECTED', { reason });
+            logger.warning(`⚠️ WhatsApp desconectado: ${reason}`);
         });
     }
 
@@ -76,10 +91,10 @@ class WhatsAppService {
             }
             
             await this.client.sendMessage(to, message);
-            logger.debug('Mensagem enviada', { to, preview: message.substring(0, 50) });
+            logger.debug('📨 Mensagem enviada', { to, preview: message.substring(0, 50) });
             return true;
         } catch (error) {
-            logger.error('Erro ao enviar mensagem', error);
+            logger.error('❌ Erro ao enviar mensagem', error);
             return false;
         }
     }
@@ -96,10 +111,10 @@ class WhatsAppService {
             
             const media = MessageMedia.fromFilePath(mediaPath);
             await this.client.sendMessage(to, media, { caption });
-            logger.debug('Mídia enviada', { to, file: path.basename(mediaPath) });
+            logger.debug('🖼️ Mídia enviada', { to, file: path.basename(mediaPath) });
             return true;
         } catch (error) {
-            logger.error('Erro ao enviar mídia', error);
+            logger.error('❌ Erro ao enviar mídia', error);
             return false;
         }
     }
@@ -127,6 +142,13 @@ class WhatsAppService {
 
     getQRCode() {
         return this.qrCode;
+    }
+
+    // ✅ MÉTODO PARA RESETAR (se precisar desconectar)
+    resetQRFlag() {
+        this.ignoreQR = false;
+        this.qrCode = null;
+        logger.info('🔄 QR Flag resetada - novo login necessário');
     }
 }
 
