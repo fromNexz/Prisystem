@@ -1,4 +1,4 @@
-// Bot WhatsApp - Salão da Pri (SEM TOKENS)
+// Bot WhatsApp - Salão da Pri (VERSÃO CORRIGIDA)
 
 const qrcode = require('qrcode-terminal');
 const { Client, MessageMedia } = require('whatsapp-web.js');
@@ -6,7 +6,12 @@ const fs = require('fs');
 const path = require('path');
 const qr = require('qrcode');
 
-const client = new Client();
+const client = new Client({
+    puppeteer: {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
+});
 
 // Carrega configurações do arquivo rotas.json
 let SISTEMA_WEB_URL = 'http://localhost:8000';
@@ -19,7 +24,8 @@ try {
     console.log('CONFIG_ERROR: Erro ao carregar rotas.json, usando URL padrão');
 }
 
-// Leitor de QR Code
+// ==================== EVENTOS DE CONEXÃO ====================
+
 client.on('qr', async (qrString) => {
     console.log('QR_GENERATED');
     console.log('📱 QR Code gerado! Salvando como imagem...');
@@ -35,45 +41,30 @@ client.on('qr', async (qrString) => {
         });
         
         console.log('QR_IMAGE_SAVED');
-        console.log(`QR Code salvo como imagem: ${qrPath}`);
-        console.log('Abra o arquivo whatsapp_qr.png para escanear');
+        console.log(`QR Code salvo: ${qrPath}`);
         
     } catch (error) {
-        console.log('QR_ERROR');
-        console.log('Erro ao gerar QR Code:', error.message);
+        console.log('QR_ERROR:', error.message);
     }
 });
 
-// Confirmação de conexão
 client.on('ready', () => {
     console.log('WHATSAPP_CONNECTED');
-    console.log('✅ Tudo certo! WhatsApp conectado.');
-    console.log('🤖 Bot do Salão da Pri ativo e aguardando mensagens...');
+    console.log('✅ WhatsApp conectado - Bot ativo!');
 });
 
-// Eventos de conexão
-client.on('authenticated', (session) => {
+client.on('authenticated', () => {
     console.log('WHATSAPP_AUTH_SUCCESS');
-    console.log('✅ WhatsApp autenticado com sucesso');
+    console.log('✅ Autenticado com sucesso');
 });
 
 client.on('auth_failure', (msg) => {
-    console.log('WHATSAPP_AUTH_ERROR');
-    console.log('❌ Falha na autenticação do WhatsApp:', msg);
+    console.log('WHATSAPP_AUTH_ERROR:', msg);
 });
 
 client.on('disconnected', (reason) => {
-    console.log('WHATSAPP_DISCONNECTED');
-    console.log('📱 WhatsApp desconectado. Motivo:', reason);
+    console.log('WHATSAPP_DISCONNECTED:', reason);
 });
-
-// Inicializa o cliente
-console.log('BOT_STARTING');
-console.log('🤖 Iniciando Bot do WhatsApp...');
-client.initialize();
-
-// Função delay
-const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // ==================== DADOS DOS SERVIÇOS ====================
 
@@ -118,12 +109,13 @@ const ESTADOS = {
     AGUARDANDO_CONTATO: 'aguardando_contato'
 };
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 function resetarConversa(numeroTelefone) {
     if (conversasAtivas[numeroTelefone]) {
         delete conversasAtivas[numeroTelefone];
     }
-    console.log('CONVERSATION_RESET');
-    console.log(`🔄 Conversa resetada para ${numeroTelefone}`);
+    console.log(`🔄 Conversa resetada: ${numeroTelefone}`);
 }
 
 async function mostrarMenuInicial(msg, firstName) {
@@ -141,7 +133,7 @@ async function mostrarMenuInicial(msg, firstName) {
         `*2* - ✂️ Serviços e valores\n` +
         `*3* - 🎁 Combos especiais\n` +
         `*4* - 📞 Conversar com a Pri\n` +
-        `*(Para responder, digite os números respectivos. Ex: Digite 1 para agendar)*`
+        `*(Para responder, digite os números respectivos)*`
     );
     
     conversasAtivas[msg.from] = {
@@ -149,8 +141,7 @@ async function mostrarMenuInicial(msg, firstName) {
         nome: firstName
     };
     
-    console.log('MENU_SENT');
-    console.log(`📋 Menu inicial enviado para ${firstName}`);
+    console.log(`📋 Menu enviado para ${firstName}`);
 }
 
 async function processarMenuInicial(msg, mensagem, conversa, chat) {
@@ -160,42 +151,34 @@ async function processarMenuInicial(msg, mensagem, conversa, chat) {
     
     switch (mensagem) {
         case '1':
-            console.log('USER_SELECTED_SCHEDULING');
-            console.log(`📅 ${conversa.nome} selecionou agendamento`);
+            console.log(`📅 ${conversa.nome} → Agendamento`);
             
-            // LINK SIMPLES - SEM TOKENS
             await client.sendMessage(msg.from,
                 `📅 *Agendamento Online*\n\n` +
-                `Perfeito ${conversa.nome}! Para agendar seu horário, clique no link abaixo:\n\n` +
+                `Perfeito ${conversa.nome}! Para agendar seu horário:\n\n` +
                 `🔗 ${SISTEMA_WEB_URL}\n\n` +
-                `✨ *Vantagens do agendamento online:*\n` +
-                `• Veja horários disponíveis em tempo real\n` +
+                `✨ *Vantagens:*\n` +
+                `• Horários em tempo real\n` +
                 `• Escolha o serviço desejado\n` +
                 `• Confirmação instantânea\n` +
                 `• Lembretes automáticos\n\n` +
-                `💬 Precisa de ajuda? Digite *4* para falar comigo diretamente!`
+                `💬 Precisa de ajuda? Digite *4*`
             );
 
             await delay(2000);
             
             try {
-                const imagePath = path.join('C:', 'Users', 'pedro', 'OneDrive', 'Área de Trabalho', 'Pri', 'ex.png'); // Alteração de caminho necessária
+                const imagePath = path.join(__dirname, 'ex.png');
                 
                 if (fs.existsSync(imagePath)) {
                     const media = MessageMedia.fromFilePath(imagePath);
                     await client.sendMessage(msg.from, media, {
-                        caption: `🔍 *O que é essa tela?*\n\n` +
-                                `Está tudo bem, essa é uma tela de verificação para sua segurança.\n\n` +
-                                `Para ir para o site de agendamento basta clicar em *"Visit Site"* ✅`
+                        caption: `🔍 *Como acessar*\n\n` +
+                                `Clique em *"Visit Site"* para continuar ✅`
                     });
-                    console.log('HELP_IMAGE_SENT');
-                    console.log(`📸 Imagem de ajuda enviada para ${conversa.nome}`);
-                } else {
-                    console.log('IMAGE_NOT_FOUND');
-                    console.log(`⚠️ Imagem não encontrada em: ${imagePath}`);
+                    console.log(`📸 Imagem enviada para ${conversa.nome}`);
                 }
             } catch (error) {
-                console.log('IMAGE_SEND_ERROR');
                 console.log(`❌ Erro ao enviar imagem: ${error.message}`);
             }
             
@@ -203,33 +186,26 @@ async function processarMenuInicial(msg, mensagem, conversa, chat) {
             break;
             
         case '2':
-            console.log('USER_SELECTED_SERVICES');
-            console.log(`✂️ ${conversa.nome} selecionou serviços e valores`);
-            
+            console.log(`✂️ ${conversa.nome} → Serviços`);
             await mostrarServicos(msg, conversa, chat);
             break;
             
         case '3':
-            console.log('USER_SELECTED_COMBOS');
-            console.log(`🎁 ${conversa.nome} selecionou combos especiais`);
-            
+            console.log(`🎁 ${conversa.nome} → Combos`);
             await mostrarCombos(msg, conversa, chat);
             break;
             
         case '4':
-            console.log('USER_REQUESTED_CONTACT');
-            console.log(`📞 ${conversa.nome} solicitou contato direto`);
+            console.log(`📞 ${conversa.nome} → Contato direto`);
             
             await client.sendMessage(msg.from,
                 `📞 *Falar com a Pri*\n\n` +
-                `Oi ${conversa.nome}! A Pri estará disponível para te atender:\n\n` +
-                `⏰ *Horário de Atendimento:*\n` +
-                `Segunda a Sexta: 9h às 18h\n` +
-                `Sábado: 8h às 16h\n\n` +
-                `📱 *Contato direto:*\n` +
-                `WhatsApp: +55 55 99154-6257\n` +
-                `Instagram: @primalzoni_estetica\n\n` +
-                `🔙 Digite *menu* para voltar ao menu principal`
+                `Oi ${conversa.nome}! Horário de atendimento:\n\n` +
+                `⏰ Segunda a Sexta: 9h às 18h\n` +
+                `⏰ Sábado: 8h às 16h\n\n` +
+                `📱 WhatsApp: +55 55 99154-6257\n` +
+                `📸 Instagram: @primalzoni_estetica\n\n` +
+                `🔙 Digite *menu* para voltar`
             );
             
             conversasAtivas[msg.from].estado = ESTADOS.AGUARDANDO_CONTATO;
@@ -237,19 +213,17 @@ async function processarMenuInicial(msg, mensagem, conversa, chat) {
             
         case 'menu':
         case 'Menu':
-            console.log('USER_REQUESTED_MENU');
-            console.log(`🔙 ${conversa.nome} solicitou retorno ao menu`);
-            
+        case 'MENU':
+            console.log(`🔙 ${conversa.nome} → Menu`);
             await mostrarMenuInicial(msg, conversa.nome);
             break;
             
         default:
-            console.log('USER_INVALID_OPTION');
-            console.log(`❓ ${conversa.nome} enviou opção inválida: ${mensagem}`);
+            console.log(`❓ Opção inválida de ${conversa.nome}: ${mensagem}`);
             
             await client.sendMessage(msg.from,
                 `🤔 Não entendi sua opção.\n\n` +
-                `Por favor, escolha uma das opções:\n\n` +
+                `Por favor, escolha:\n\n` +
                 `*1* - 📅 Agendar horário\n` +
                 `*2* - ✂️ Serviços e valores\n` +
                 `*3* - 🎁 Combos especiais\n` +
@@ -269,9 +243,9 @@ async function mostrarServicos(msg, conversa, chat) {
         listaServicos += `${index + 1}. *${servico.nome}*\n   💰 ${servico.preco}\n\n`;
     });
     
-    listaServicos += `📅 Para agendar qualquer serviço, digite *1*\n`;
-    listaServicos += `🎁 Quer ver nossos combos? Digite *3*\n`;
-    listaServicos += `🔙 Voltar ao menu: digite *menu*`;
+    listaServicos += `📅 Agendar: digite *1*\n`;
+    listaServicos += `🎁 Ver combos: digite *3*\n`;
+    listaServicos += `🔙 Menu: digite *menu*`;
     
     await client.sendMessage(msg.from, listaServicos);
     
@@ -283,19 +257,22 @@ async function mostrarCombos(msg, conversa, chat) {
     await chat.sendStateTyping();
     await delay(3500);
     
-    let listaCombos = `🎁 *Combos Especiais - Economia Garantida!*\n\n`;
+    let listaCombos = `🎁 *Combos Especiais*\n\n`;
     
     Object.values(combos).forEach((combo, index) => {
+        const economia = parseInt(combo.preco_original.replace(/\D/g, '')) - 
+                        parseInt(combo.preco_combo.replace(/\D/g, ''));
+        
         listaCombos += `${index + 1}. *${combo.nome}*\n`;
         listaCombos += `   📋 ${combo.servicos}\n`;
         listaCombos += `   🎁 Brinde: ${combo.brinde}\n`;
         listaCombos += `   💸 De ${combo.preco_original} por *${combo.preco_combo}*\n`;
-        listaCombos += `   💰 Economia: R$ ${parseInt(combo.preco_original.replace(/\D/g, '')) - parseInt(combo.preco_combo.replace(/\D/g, ''))},00\n\n`;
+        listaCombos += `   💰 Economia: R$ ${economia},00\n\n`;
     });
     
-    listaCombos += `📅 Para agendar qualquer combo, digite *1*\n`;
-    listaCombos += `✂️ Quer ver serviços individuais? Digite *2*\n`;
-    listaCombos += `🔙 Voltar ao menu: digite *menu*`;
+    listaCombos += `📅 Agendar: digite *1*\n`;
+    listaCombos += `✂️ Ver serviços: digite *2*\n`;
+    listaCombos += `🔙 Menu: digite *menu*`;
     
     await client.sendMessage(msg.from, listaCombos);
     
@@ -307,9 +284,9 @@ async function processarEscolhaServico(msg, mensagem, conversa, chat) {
         case '1':
             await client.sendMessage(msg.from,
                 `📅 *Agendar Serviço*\n\n` +
-                `Perfeito! Clique no link abaixo para agendar:\n\n` +
+                `Perfeito! Acesse:\n\n` +
                 `🔗 ${SISTEMA_WEB_URL}\n\n` +
-                `Você poderá escolher o serviço específico na página de agendamento! 😊`
+                `Escolha o serviço na página de agendamento! 😊`
             );
             conversasAtivas[msg.from].estado = ESTADOS.AGUARDANDO_CONTATO;
             break;
@@ -318,17 +295,18 @@ async function processarEscolhaServico(msg, mensagem, conversa, chat) {
             await mostrarCombos(msg, conversa, chat);
             break;
             
-        case 'menu', 'Menu':
+        case 'menu':
+        case 'Menu':
+        case 'MENU':
             await mostrarMenuInicial(msg, conversa.nome);
             break;
             
         default:
             await client.sendMessage(msg.from,
                 `🤔 Opção não reconhecida.\n\n` +
-                `Digite:\n` +
-                `*1* - Para agendar\n` +
+                `*1* - Agendar\n` +
                 `*3* - Ver combos\n` +
-                `*menu* - Voltar ao início`
+                `*menu* - Voltar`
             );
     }
 }
@@ -338,9 +316,9 @@ async function processarEscolhaCombo(msg, mensagem, conversa, chat) {
         case '1':
             await client.sendMessage(msg.from,
                 `📅 *Agendar Combo*\n\n` +
-                `Excelente escolha! Clique no link abaixo:\n\n` +
+                `Excelente escolha! Acesse:\n\n` +
                 `🔗 ${SISTEMA_WEB_URL}\n\n` +
-                `Na página você poderá selecionar o combo desejado! ✨`
+                `Selecione o combo desejado! ✨`
             );
             conversasAtivas[msg.from].estado = ESTADOS.AGUARDANDO_CONTATO;
             break;
@@ -350,120 +328,111 @@ async function processarEscolhaCombo(msg, mensagem, conversa, chat) {
             break;
             
         case 'menu':
+        case 'Menu':
+        case 'MENU':
             await mostrarMenuInicial(msg, conversa.nome);
             break;
             
         default:
             await client.sendMessage(msg.from,
                 `🤔 Opção não reconhecida.\n\n` +
-                `Digite:\n` +
-                `*1* - Para agendar combo\n` +
-                `*2* - Ver serviços individuais\n` +
-                `*menu* - Voltar ao início`
+                `*1* - Agendar combo\n` +
+                `*2* - Ver serviços\n` +
+                `*menu* - Voltar`
             );
     }
 }
 
 async function processarAguardandoContato(msg, mensagem, conversa, chat) {
-    switch (mensagem) {
-        case 'menu':
-        case 'Menu':
-            await mostrarMenuInicial(msg, conversa.nome);
-            break;
-            
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-            await processarMenuInicial(msg, mensagem, conversa, chat);
-            break;
-            
-        default:
-            await client.sendMessage(msg.from,
-                `Oi ${conversa.nome}! 👋\n\n` +
-                `Para uma nova consulta, digite *menu* ou escolha:\n\n` +
-                `*1* - 📅 Agendar horário\n` +
-                `*2* - ✂️ Serviços e valores\n` +
-                `*3* - 🎁 Combos especiais\n` +
-                `*4* - 📞 Conversar com a Pri`
-            );
+    const mensagemLower = mensagem.toLowerCase();
+    
+    if (mensagemLower === 'menu') {
+        await mostrarMenuInicial(msg, conversa.nome);
+    } else if (['1', '2', '3', '4'].includes(mensagem)) {
+        await processarMenuInicial(msg, mensagem, conversa, chat);
+    } else {
+        await client.sendMessage(msg.from,
+            `Oi ${conversa.nome}! 👋\n\n` +
+            `Digite *menu* ou escolha:\n\n` +
+            `*1* - 📅 Agendar\n` +
+            `*2* - ✂️ Serviços\n` +
+            `*3* - 🎁 Combos\n` +
+            `*4* - 📞 Falar com a Pri`
+        );
     }
 }
 
-// ==================== SISTEMA PRINCIPAL DE MENSAGENS ====================
+// ==================== HANDLER PRINCIPAL ====================
 
 client.on('message', async msg => {
-    
-    if (!msg.from.endsWith('@c.us')) {
-        return;
-    }
-    
-    const mensagem = msg.body.trim();
-    const conversa = conversasAtivas[msg.from];
-    const contact = await msg.getContact();
-    const firstName = contact.pushname ? contact.pushname.split(' ')[0] : 'Cliente';
-    
-    console.log('MESSAGE_RECEIVED');
-    console.log(`📨 Mensagem de ${firstName} (${msg.from}): ${mensagem}`);
-    
-    if (!conversa && mensagem.match(/(Pri|pri|PRI|menu|Menu|dia|tarde|noite|oi|Oi|Olá|olá|ola|Ola|bom dia|boa tarde|boa noite|1|2|3|4)/i)) {
-        console.log('CONVERSATION_STARTED');
-        console.log(`🆕 Nova conversa iniciada com ${firstName}`);
-        await mostrarMenuInicial(msg, firstName);
-        return;
-    }
-    
-    if (!conversa) {
-        console.log('CONVERSATION_NOT_RECOGNIZED');
-        console.log(`❓ Mensagem não reconhecida de ${firstName}: ${mensagem}`);
+    try {
+        // Ignorar mensagens de grupos
+        if (!msg.from.endsWith('@c.us')) {
+            return;
+        }
         
-        await delay(2000);
-        const chat = await msg.getChat();
-        await chat.sendStateTyping();
-        await delay(2000);
+        // Ignorar mensagens do próprio bot
+        if (msg.fromMe) {
+            return;
+        }
         
-        await client.sendMessage(msg.from, 
-            `🤔 Não entendi sua mensagem.\n\n` +
-            `Digite *menu* para iniciar ou uma das opções:\n\n` +
-            `*1* - Agendar horário\n` +
-            `*2* - Serviços e valores\n` +
-            `*3* - Combos especiais\n` +
-            `*4* - Falar com a Pri`
-        );
-        return;
-    }
-    
-    const chat = await msg.getChat();
-    
-    console.log('PROCESSING_STATE');
-    console.log(`⚡ Processando estado ${conversa.estado} para ${firstName}`);
-    
-    switch (conversa.estado) {
-        case ESTADOS.MENU_INICIAL:
-            await processarMenuInicial(msg, mensagem, conversa, chat);
-            break;
-            
-        case ESTADOS.ESCOLHENDO_SERVICO:
-            await processarEscolhaServico(msg, mensagem, conversa, chat);
-            break;
-            
-        case ESTADOS.ESCOLHENDO_COMBO:
-            await processarEscolhaCombo(msg, mensagem, conversa, chat);
-            break;
-            
-        case ESTADOS.AGUARDANDO_CONTATO:
-            await processarAguardandoContato(msg, mensagem, conversa, chat);
-            break;
-            
-        default:
-            console.log('UNKNOWN_STATE');
-            console.log(`❌ Estado desconhecido: ${conversa.estado}`);
-            resetarConversa(msg.from);
+        const mensagem = msg.body.trim();
+        const conversa = conversasAtivas[msg.from];
+        const contact = await msg.getContact();
+        const firstName = contact.pushname ? contact.pushname.split(' ')[0] : 'Cliente';
+        
+        console.log(`📨 ${firstName}: ${mensagem}`);
+        
+        // Se não há conversa ativa, iniciar nova conversa com QUALQUER mensagem
+        if (!conversa) {
+            console.log(`🆕 Nova conversa: ${firstName}`);
             await mostrarMenuInicial(msg, firstName);
+            return;
+        }
+        
+        const chat = await msg.getChat();
+        
+        // Processar baseado no estado atual
+        switch (conversa.estado) {
+            case ESTADOS.MENU_INICIAL:
+                await processarMenuInicial(msg, mensagem, conversa, chat);
+                break;
+                
+            case ESTADOS.ESCOLHENDO_SERVICO:
+                await processarEscolhaServico(msg, mensagem, conversa, chat);
+                break;
+                
+            case ESTADOS.ESCOLHENDO_COMBO:
+                await processarEscolhaCombo(msg, mensagem, conversa, chat);
+                break;
+                
+            case ESTADOS.AGUARDANDO_CONTATO:
+                await processarAguardandoContato(msg, mensagem, conversa, chat);
+                break;
+                
+            default:
+                console.log(`❌ Estado desconhecido: ${conversa.estado}`);
+                resetarConversa(msg.from);
+                await mostrarMenuInicial(msg, firstName);
+        }
+        
+    } catch (error) {
+        console.error('❌ ERRO no handler de mensagens:', error);
+        
+        try {
+            await client.sendMessage(msg.from, 
+                `😔 Desculpe, ocorreu um erro.\n\n` +
+                `Digite *menu* para recomeçar.`
+            );
+        } catch (sendError) {
+            console.error('❌ Erro ao enviar mensagem de erro:', sendError);
+        }
     }
 });
 
-console.log('CHATBOT_INITIALIZED');
-console.log('🚀 Chatbot Pri Malzoni inicializado - VERSÃO SIMPLIFICADA');
-console.log('📱 Aguardando conexão com WhatsApp...');
-console.log('🔧 Sistema de tokens REMOVIDO - Link direto único');
+// ==================== INICIALIZAÇÃO ====================
+
+console.log('🚀 Iniciando Bot do WhatsApp...');
+console.log('📱 Aguardando conexão...');
+
+client.initialize();
