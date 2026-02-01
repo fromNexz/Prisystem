@@ -1,0 +1,12 @@
+{
+  "ngrok_url": "https://416721707890.ngrok-free.app",
+  "local_url": "http://localhost:8000",
+  "last_updated": "2026-01-31T15:20:57.301224",
+  "admin_password": "pri2025@admin",
+  "version": "2.2",
+  "services": {
+    "servidor": true,
+    "chatbot": true,
+    "ngrok": true
+  }
+}

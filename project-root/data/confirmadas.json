@@ -1,0 +1,101 @@
+{
+  "last_updated": "2025-09-26T22:41:32.663Z",
+  "total_appointments": 5,
+  "appointments": [
+    {
+      "id": 1758765348664,
+      "name": "Naty Tormes",
+      "phone": "55991781662",
+      "service": {
+        "name": "Meia Perna",
+        "price": 40,
+        "id": "meia-perna",
+        "sessions": "1",
+        "duration": 30
+      },
+      "date": "25/09/2025",
+      "time": "08:00",
+      "price": 40,
+      "duration": 30,
+      "confirmed_at": "24/09/2025, 22:56:01",
+      "token": "1758745847678_7402_kzep0b94cs",
+      "created_at": "24/09/2025, 22:55:48"
+    },
+    {
+      "id": 1758765424242,
+      "name": "teste1",
+      "phone": "55999017402",
+      "service": {
+        "name": "Brow Lamination",
+        "price": 150,
+        "id": "brow-lamination",
+        "sessions": "1",
+        "duration": 90
+      },
+      "date": "29/09/2025",
+      "time": "10:00",
+      "price": 150,
+      "duration": 90,
+      "confirmed_at": "24/09/2025, 22:57:14",
+      "token": "1758745847678_7402_kzep0b94cs",
+      "created_at": "24/09/2025, 22:57:04"
+    },
+    {
+      "id": 1758765656817,
+      "name": "Nataly",
+      "phone": "55999017402",
+      "service": {
+        "name": "Manutenção Cílios",
+        "price": 90,
+        "id": "manutencao-cilios",
+        "sessions": "1",
+        "duration": 45
+      },
+      "date": "25/09/2025",
+      "time": "13:10",
+      "price": 90,
+      "duration": 45,
+      "confirmed_at": "24/09/2025, 23:01:21",
+      "token": "1758745847678_7402_kzep0b94cs",
+      "created_at": "24/09/2025, 23:00:56"
+    },
+    {
+      "id": 1758925211235,
+      "name": "Naty",
+      "phone": "55999017402",
+      "service": {
+        "name": "Lash Lifting",
+        "price": 120,
+        "id": "lash-lifting",
+        "sessions": "1",
+        "duration": 80
+      },
+      "date": "27/09/2025",
+      "time": "07:30",
+      "price": 120,
+      "duration": 80,
+      "confirmed_at": "26/09/2025, 19:21:00",
+      "token": "1758925110804_7402_ph9tun9boxm",
+      "created_at": "26/09/2025, 19:20:11"
+    },
+    {
+      "id": 1758926119641,
+      "name": "Natyyyy",
+      "phone": "55999017402",
+      "service": {
+        "name": "Nariz",
+        "price": 15,
+        "id": "nariz",
+        "sessions": "1",
+        "duration": 10
+      },
+      "date": "25/09/2025",
+      "time": "07:40",
+      "price": 15,
+      "duration": 10,
+      "confirmed_at": "26/09/2025, 19:35:36",
+      "token": "1758926092429_7402_bbj6winizgn",
+      "created_at": "26/09/2025, 19:35:19"
+    }
+  ]
+}

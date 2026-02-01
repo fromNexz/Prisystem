@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pri Malzoni Estética</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #333, #555);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .admin-content {
+            padding: 30px 20px;
+        }
+
+        .admin-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .appointment-card {
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+        }
+
+        .confirmed-appointment {
+            border: 2px solid #27ae60;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #e8f5e8, #f0fdf4);
+        }
+
+        .appointment-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .status-confirmed {
+            background: #a8e6cf;
+            color: #00b894;
+        }
+
+        .whatsapp-confirm-btn {
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-confirm-btn:hover {
+            background: #128c7e;
+            transform: translateY(-1px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: translateY(50px) scale(0.9);
+            transition: all 0.3s ease;
+            margin: auto;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            border-radius: 20px 20px 0 0;
+            flex-shrink: 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .client-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #25d366;
+        }
+
+        .client-info h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .client-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .client-detail:last-child {
+            border-bottom: none;
+        }
+
+        .message-textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 14px;
+            resize: vertical;
+            background: #f8f9fa;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn-whatsapp {
+            flex: 1;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-copy {
+            flex: 1;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .password-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .password-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+        }
+
+        .password-error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-bottom: 20px;
+            opacity: 0;
+        }
+
+        .password-error.show {
+            opacity: 1;
+        }
+
+        .password-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .password-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+
+            .modal-header {
+                padding: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="passwordModal" class="password-modal active">
+        <div class="password-content">
+            <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">🔐 Acesso Administrativo</div>
+            <div style="color: #666; margin-bottom: 30px;">Digite a senha para acessar o painel</div>
+            <input type="password" id="passwordInput" class="password-input" placeholder="••••••••" maxlength="20">
+            <div id="passwordError" class="password-error">Senha incorreta. Tente novamente.</div>
+            <div style="display: flex; gap: 15px;">
+                <button class="password-btn" style="background: #f8f9fa; color: #666;" onclick="goBackToIndex()">Voltar</button>
+                <button class="password-btn primary" onclick="verifyPassword()">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+        <div class="admin-header">
+            <h1>🔧 Painel Administrativo</h1>
+            <p>Gerenciar agendamentos - Pri Malzoni Estética</p>
+        </div>
+
+        <div class="admin-content">
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <div class="stats-number" id="totalPending">0</div>
+                    <div class="stats-label">Pendentes</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number" id="totalConfirmed">0</div>
+                    <div class="stats-label">Confirmados</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number" id="totalToday">0</div>
+                    <div class="stats-label">Hoje</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number" id="totalRevenue">R$ 0</div>
+                    <div class="stats-label">Receita Total</div>
+                </div>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="showTab('pending')">🔄 Pendentes</button>
+                <button class="tab-btn" onclick="showTab('confirmed')">✅ Confirmados</button>
+                <button class="tab-btn" onclick="showTab('all')">📋 Todos</button>
+            </div>
+
+            <div id="pendingTab" class="tab-content active">
+                <h3>Agendamentos Pendentes de Confirmação:</h3>
+                <div id="appointmentsList"></div>
+            </div>
+
+            <div id="confirmedTab" class="tab-content">
+                <h3>Agendamentos Confirmados:</h3>
+                <div id="confirmedAppointmentsList"></div>
+            </div>
+
+            <div id="allTab" class="tab-content">
+                <h3>Histórico Completo de Agendamentos:</h3>
+                <div id="allAppointmentsList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="copyPasteModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📱 Enviar Confirmação WhatsApp</h3>
+                <button class="modal-close" onclick="closeCopyPasteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="client-info">
+                    <h4>👤 Dados do Cliente</h4>
+                    <div class="client-detail">
+                        <strong>Nome:</strong>
+                        <span id="modalClientName">-</span>
+                    </div>
+                    <div class="client-detail">
+                        <strong>Telefone:</strong>
+                        <span id="modalClientPhone">-</span>
+                    </div>
+                    <div class="client-detail">
+                        <strong>Serviço:</strong>
+                        <span id="modalClientService">-</span>
+                    </div>
+                    <div class="client-detail">
+                        <strong>Data/Hora:</strong>
+                        <span id="modalClientDateTime">-</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">💬 Mensagem para WhatsApp:</label>
+                    <textarea id="modalMessage" class="message-textarea" readonly></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-copy" onclick="copyModalMessage()">📋 Copiar</button>
+                    <a id="whatsappLink" class="btn-whatsapp" target="_blank">📱 WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBYo_laDj2ZfxWZLzCJvFaPq3sj0iOCfWM",
+            authDomain: "agendamentos-pri.firebaseapp.com",
+            projectId: "agendamentos-pri",
+            storageBucket: "agendamentos-pri.firebasestorage.app",
+            messagingSenderId: "131199864323",
+            appId: "1:131199864323:web:ddd2d06c7d2ac16721c836",
+            measurementId: "G-9FNZV0V1JB"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const ADMIN_PASSWORD = "pri2025@admin";
+        let isAuthenticated = false;
+        let currentAppointmentId = null;
+
+        function verifyPassword() {
+            const input = document.getElementById('passwordInput');
+            const error = document.getElementById('passwordError');
+            
+            if (input.value.trim() === ADMIN_PASSWORD) {
+                isAuthenticated = true;
+                document.getElementById('passwordModal').classList.remove('active');
+                document.getElementById('adminPanel').style.display = 'block';
+                loadAdminData();
+            } else {
+                error.classList.add('show');
+                input.value = '';
+                setTimeout(() => error.classList.remove('show'), 3000);
+            }
+        }
+
+        function goBackToIndex() {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') verifyPassword();
+        });
+
+        async function loadAdminData() {
+            try {
+                const snapshot = await db.collection('appointments').orderBy('createdAt', 'desc').get();
+                const appointments = [];
+                
+                snapshot.forEach(doc => {
+                    appointments.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                updateStats(appointments);
+                loadPendingAppointments(appointments);
+                loadConfirmedAppointments(appointments);
+                loadAllAppointments(appointments);
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao conectar com o Firebase. Verifique sua conexão.');
+            }
+        }
+
+        function updateStats(appointments) {
+            const pending = appointments.filter(apt => apt.status === 'pending').length;
+            const confirmed = appointments.filter(apt => apt.status === 'confirmed').length;
+            
+            const today = new Date().toLocaleDateString('pt-BR');
+            const todayCount = appointments.filter(apt => apt.appointmentDate === today).length;
+            
+            const revenue = appointments
+                .filter(apt => apt.status === 'confirmed')
+                .reduce((sum, apt) => sum + (apt.servicePrice || 0), 0);
+
+            document.getElementById('totalPending').textContent = pending;
+            document.getElementById('totalConfirmed').textContent = confirmed;
+            document.getElementById('totalToday').textContent = todayCount;
+            document.getElementById('totalRevenue').textContent = `R$ ${revenue.toFixed(2)}`;
+        }
+
+        function formatDuration(minutes) {
+            if (minutes < 60) return `${minutes} min`;
+            if (minutes % 60 === 0) return `${minutes / 60}h`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h${mins.toString().padStart(2, '0')}min`;
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'N/A';
+            if (timestamp.toDate) {
+                return timestamp.toDate().toLocaleString('pt-BR');
+            }
+            return 'N/A';
+        }
+
+        function loadPendingAppointments(appointments) {
+            const list = document.getElementById('appointmentsList');
+            const pending = appointments.filter(apt => apt.status === 'pending');
+
+            if (pending.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">🎉 Nenhum agendamento pendente!</p>';
+                return;
+            }
+
+            list.innerHTML = pending.map(apt => `
+                <div class="appointment-card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <h4>👤 ${apt.clientName}</h4>
+                        <span class="appointment-status status-pending">Pendente</span>
+                    </div>
+                    <p><strong>📱 Telefone:</strong> ${apt.clientPhone}</p>
+                    <p><strong>✨ Serviço:</strong> ${apt.serviceName}</p>
+                    <p><strong>📅 Data:</strong> ${apt.appointmentDate} às ${apt.appointmentTime}</p>
+                    <p><strong>⏱️ Duração:</strong> ${formatDuration(apt.serviceDuration)}</p>
+                    <p><strong>💰 Valor:</strong> R$ ${apt.servicePrice.toFixed(2)}</p>
+                    <p><strong>🕒 Solicitado:</strong> ${formatTimestamp(apt.createdAt)}</p>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="whatsapp-confirm-btn" onclick="confirmAppointment('${apt.id}')" style="flex: 1;">
+                            ✅ Confirmar e Enviar WhatsApp
+                        </button>
+                        <button onclick="rejectAppointment('${apt.id}')" 
+                                style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                            ❌ Recusar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadConfirmedAppointments(appointments) {
+            const list = document.getElementById('confirmedAppointmentsList');
+            const confirmed = appointments.filter(apt => apt.status === 'confirmed');
+
+            if (confirmed.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Nenhum agendamento confirmado ainda.</p>';
+                return;
+            }
+
+            list.innerHTML = confirmed.map(apt => `
+                <div class="confirmed-appointment">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <h4>👤 ${apt.clientName}</h4>
+                        <span class="appointment-status status-confirmed">Confirmado</span>
+                    </div>
+                    <p><strong>📱 Telefone:</strong> ${apt.clientPhone}</p>
+                    <p><strong>✨ Serviço:</strong> ${apt.serviceName}</p>
+                    <p><strong>📅 Data:</strong> ${apt.appointmentDate} às ${apt.appointmentTime}</p>
+                    <p><strong>⏱️ Duração:</strong> ${formatDuration(apt.serviceDuration)}</p>
+                    <p><strong>💰 Valor:</strong> R$ ${apt.servicePrice.toFixed(2)}</p>
+                    <div style="margin-top: 15px;">
+                        <button onclick="removeAppointment('${apt.id}')" 
+                                style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                            🗑️ Remover
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadAllAppointments(appointments) {
+            const list = document.getElementById('allAppointmentsList');
+
+            if (appointments.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Nenhum agendamento encontrado.</p>';
+                return;
+            }
+
+            list.innerHTML = appointments.map(apt => `
+                <div class="appointment-card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <h4>${apt.clientName}</h4>
+                        <span class="appointment-status status-${apt.status}">
+                            ${apt.status === 'pending' ? 'Pendente' : 'Confirmado'}
+                        </span>
+                    </div>
+                    <p><strong>Telefone:</strong> ${apt.clientPhone}</p>
+                    <p><strong>Serviço:</strong> ${apt.serviceName} - R$ ${apt.servicePrice.toFixed(2)}</p>
+                    <p><strong>Data/Hora:</strong> ${apt.appointmentDate} às ${apt.appointmentTime}</p>
+                    <p><strong>Solicitado:</strong> ${formatTimestamp(apt.createdAt)}</p>
+                </div>
+            `).join('');
+        }
+
+        async function confirmAppointment(appointmentId) {
+            try {
+                await db.collection('appointments').doc(appointmentId).update({
+                    status: 'confirmed',
+                    confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const doc = await db.collection('appointments').doc(appointmentId).get();
+                const appointment = { id: doc.id, ...doc.data() };
+                
+                openCopyPasteModal(appointment);
+                loadAdminData();
+            } catch (error) {
+                console.error('Erro ao confirmar:', error);
+                alert('Erro ao confirmar agendamento.');
+            }
+        }
+
+        async function rejectAppointment(appointmentId) {
+            if (confirm('Tem certeza que deseja recusar este agendamento?')) {
+                try {
+                    await db.collection('appointments').doc(appointmentId).delete();
+                    loadAdminData();
+                    alert('✅ Agendamento recusado.');
+                } catch (error) {
+                    console.error('Erro ao recusar:', error);
+                    alert('Erro ao recusar agendamento.');
+                }
+            }
+        }
+
+        async function removeAppointment(appointmentId) {
+            if (confirm('Remover este agendamento do histórico?')) {
+                try {
+                    await db.collection('appointments').doc(appointmentId).delete();
+                    loadAdminData();
+                } catch (error) {
+                    console.error('Erro ao remover:', error);
+                    alert('Erro ao remover agendamento.');
+                }
+            }
+        }
+
+        function openCopyPasteModal(appointment) {
+            document.getElementById('modalClientName').textContent = appointment.clientName;
+            document.getElementById('modalClientPhone').textContent = appointment.clientPhone;
+            document.getElementById('modalClientService').textContent = appointment.serviceName;
+            document.getElementById('modalClientDateTime').textContent = 
+                `${appointment.appointmentDate} às ${appointment.appointmentTime}`;
+
+            const message = `Olá ${appointment.clientName}! 👋
+
+Seu agendamento foi confirmado com sucesso:
+
+📅 Data: ${appointment.appointmentDate}
+⏰ Horário: ${appointment.appointmentTime}
+✨ Serviço: ${appointment.serviceName}
+⏱️ Duração: ${formatDuration(appointment.serviceDuration)}
+💰 Valor: R$ ${appointment.servicePrice.toFixed(2)}
+
+📍 Local:
+Alfredo Brenner 198, Schettert - Cruz Alta
+
+📱 Contato: +55 55 99154-6257
+
+Te esperamos! Sua beleza merece ser realçada com carinho! 💖
+
+- Pri Malzoni Estética ✨`;
+
+            document.getElementById('modalMessage').value = message;
+            
+            const phoneClean = appointment.clientPhone.replace(/\D/g, '');
+            document.getElementById('whatsappLink').href = `https://wa.me/55${phoneClean}?text=${encodeURIComponent(message)}`;
+            
+            document.getElementById('copyPasteModal').classList.add('active');
+            currentAppointmentId = appointment.id;
+        }
+
+        function closeCopyPasteModal() {
+            document.getElementById('copyPasteModal').classList.remove('active');
+        }
+
+        async function copyModalMessage() {
+            const textarea = document.getElementById('modalMessage');
+            try {
+                await navigator.clipboard.writeText(textarea.value);
+                alert('✅ Mensagem copiada!');
+            } catch (err) {
+                textarea.select();
+                document.execCommand('copy');
+                alert('✅ Mensagem copiada!');
+            }
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        setInterval(() => {
+            if (isAuthenticated) loadAdminData();
+        }, 30000);
+    </script>
+</body>
+</html>c
