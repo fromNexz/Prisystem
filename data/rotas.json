@@ -1,0 +1,11 @@
+{
+  "ngrok_url": "https://f845f593da71.ngrok-free.app",
+  "local_url": "http://localhost:8000",
+  "last_updated": "2026-02-01T14:24:06.336871",
+  "version": "3.0",
+  "services": {
+    "servidor": true,
+    "chatbot": false,
+    "ngrok": true
+  }
+}

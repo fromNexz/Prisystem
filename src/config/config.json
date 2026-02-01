@@ -1,0 +1,8 @@
+{
+    "email": "Priscilamalzoni1309@gmail.com",
+    "senha": "Aruiva89",
+    "intervalo_minutos": 5,
+    "horarios_arquivo": "horarios_disponiveis.json",
+    "backup_automatico": true,
+    "log_detalhado": true
+}
